@@ -21,13 +21,21 @@
 
 #include <iostream>
 #include <Eigen/Dense>
+#include <SDL.h>
 #include <embree2/rtcore.h>
 #include <embree2/rtcore_ray.h>
+#include <immintrin.h>
+#include "camera.h"
 
+#undef main
 int main(int argc, char* argv[])
 {
-    RTCRay4 ray4;
+    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT1);
+
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
     rtcInit(NULL);
+
     rtcExit();
+    SDL_Quit();
     return 0;
 }
