@@ -21,20 +21,9 @@
 
 #ifndef __CAMERA_H
 #define __CAMERA_H
-using namespace Eigen;
 struct Camera
 {
 
-    Camera(const Vector3f& position, const Vector3f& rot, float fov = 75.f);
-
-    RTCRay4 getRayPacket4(const int x, const int y) const;
-
-    Vector3f m_TopLeft, m_TopRight, m_DownLeft;
-    Vector3f m_FrontDir, m_RightDir, m_UpDir;
-    Vector3f m_Position;
-    Vector3f m_Rotation;
-    Vector3f m_RotationMatrix;
-    float m_Fov;
 };
 
 #endif // __CAMERA_H
