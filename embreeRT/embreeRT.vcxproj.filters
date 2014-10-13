@@ -29,5 +29,11 @@
     <ClInclude Include="..\src\SIMD_SSE.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
