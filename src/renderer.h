@@ -1,6 +1,5 @@
 #ifndef __RENDERER_H
 #define __RENDERER_H
-vec3 FrameBuf[FRAME_WIDTH][FRAME_HEIGHT];
 SDL_Window* m_Window = nullptr;
 SDL_Surface* m_Surface = nullptr;
 
@@ -26,13 +25,13 @@ std::uint32_t ConvertPixel(const vec3& pixel)
 
 using namespace glm;
 
-void SwapBuffers()
+void SwapBuffers(const vec3 buf[FRAME_WIDTH][FRAME_HEIGHT])
 {
     for (int y = 0; y < FRAME_HEIGHT; y++)
     {
         Uint32 *row = (Uint32*) ((Uint8*) m_Surface->pixels + y * m_Surface->pitch);
         for (int x = 0; x < FRAME_WIDTH; x++)
-            row[x] = ConvertPixel(FrameBuf[x][y]);
+            row[x] = ConvertPixel(buf[x][y]);
     }
     SDL_UpdateWindowSurface(m_Window);
 }
@@ -88,7 +87,6 @@ bool initVideo()
     greenShift = m_Surface->format->Gshift;
     blueShift = m_Surface->format->Bshift;
 
-    SwapBuffers();
     auto end = std::chrono::high_resolution_clock::now();
 
     auto timeSec = timePast(begin, end);
@@ -96,12 +94,27 @@ bool initVideo()
     std::cout << "Seting up SDL took: " << timeSec << " sec " << timeMili - (timeSec * 1000) << " milisec" << std::endl;
     return true;
 }
-
-
-vec3 Raytrace(const RTCRay& ray)
+vec3 Raytrace(RTCRay& ray, const RTCScene& scene)
 {
-
+    rtcIntersect(scene, ray);
+    if (ray.geomID != RTC_INVALID_GEOMETRY_ID)
+    {
+        return vec3(1, 0.3, 0);
+    }
     return vec3(0);
 }
+void RenderBuffer(const Camera& cam, vec3 buf[FRAME_WIDTH][FRAME_HEIGHT], const RTCScene& scene)
+{
+    for (auto x = 0; x < FRAME_WIDTH; x++)
+    {
+        for (auto y = 0; y < FRAME_HEIGHT; y++)
+        {
+            auto r = cam.getRay(x, y);
+            buf[x][y] = Raytrace(r, scene);
+        }
+    }
+    SwapBuffers(buf);
+}
+
 
 #endif

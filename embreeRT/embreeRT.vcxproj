@@ -125,6 +125,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\camera.cpp" />
     <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\camera.h" />

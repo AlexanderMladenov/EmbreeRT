@@ -36,8 +36,8 @@
 #include "constants.h"
 #include "SIMD_SSE.h"
 
-#include "renderer.h"
 #include "camera.h"
+#include "renderer.h"
 
 
 /* error reporting function */
@@ -58,7 +58,7 @@ void error_handler(const RTCError code, const char* str)
 /* vertex and triangle layout */
 struct Vertex { float x, y, z, r; };
 struct Triangle { int v0, v1, v2; };
-
+vec3 FrameBuf[FRAME_WIDTH][FRAME_HEIGHT];
 
 #undef main
 int main(int argc, char* argv[])
@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
         return -1;
     }
     rtcSetErrorFunction(error_handler);
-    Camera cam(vec3(0, 0, -5), vec3(0), 75.f);
+    Camera cam(vec3(0, 0, 0), vec3(10, 0, 0), 75);
 
     RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT1);
 
@@ -95,14 +95,7 @@ int main(int argc, char* argv[])
     rtcUnmapBuffer(scene, mesh, RTC_INDEX_BUFFER);
     rtcCommit(scene);
 
-    for (auto x = 0; x < FRAME_WIDTH; x++)
-    {
-        for (auto y = 0; y < FRAME_HEIGHT; y++)
-        {
-            auto r = cam.getRay(x, y);
-        }
-    }
-
+    RenderBuffer(cam, FrameBuf, scene);
     waitForUserExit();
     rtcExit();
     SDL_Quit();
