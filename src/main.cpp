@@ -22,11 +22,15 @@
 #include <iostream>
 #include <chrono>
 
-#include <glm.hpp>
 #include <SDL.h>
 #include <embree2/rtcore.h>
 #include <embree2/rtcore_ray.h>
 
+#define GLM_FORCE_RADIANS 
+#include <glm.hpp>
+#include <gtc/quaternion.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtx/transform.hpp>
 #include <immintrin.h>
 
 #include "constants.h"
@@ -37,22 +41,24 @@
 
 
 /* error reporting function */
-void error_handler(const RTCError code)
+void error_handler(const RTCError code, const char* str)
 {
     printf("Embree: ");
-    switch (code) {
-        case RTC_UNKNOWN_ERROR: printf("RTC_UNKNOWN_ERROR"); break;
-        case RTC_INVALID_ARGUMENT: printf("RTC_INVALID_ARGUMENT"); break;
-        case RTC_INVALID_OPERATION: printf("RTC_INVALID_OPERATION"); break;
-        case RTC_OUT_OF_MEMORY: printf("RTC_OUT_OF_MEMORY"); break;
-        case RTC_UNSUPPORTED_CPU: printf("RTC_UNSUPPORTED_CPU"); break;
-        default: printf("invalid error code"); break;
+    switch (code)
+    {
+    case RTC_UNKNOWN_ERROR: printf("RTC_UNKNOWN_ERROR"); break;
+    case RTC_INVALID_ARGUMENT: printf("RTC_INVALID_ARGUMENT"); break;
+    case RTC_INVALID_OPERATION: printf("RTC_INVALID_OPERATION"); break;
+    case RTC_OUT_OF_MEMORY: printf("RTC_OUT_OF_MEMORY"); break;
+    case RTC_UNSUPPORTED_CPU: printf("RTC_UNSUPPORTED_CPU"); break;
+    default: printf("invalid error code"); break;
     }
     exit(-2);
 }
 /* vertex and triangle layout */
 struct Vertex { float x, y, z, r; };
 struct Triangle { int v0, v1, v2; };
+
 
 #undef main
 int main(int argc, char* argv[])
@@ -66,8 +72,28 @@ int main(int argc, char* argv[])
         SDL_Quit();
         return -1;
     }
+    rtcSetErrorFunction(error_handler);
 
     RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT1);
+
+    /* create a triangulated plane with 2 triangles and 4 vertices */
+    unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, 2, 4);
+
+    /* set vertices */
+    Vertex* vertices = (Vertex*)rtcMapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
+    vertices[0].x = -10; vertices[0].y = -2; vertices[0].z = -10;
+    vertices[1].x = -10; vertices[1].y = -2; vertices[1].z = +10;
+    vertices[2].x = +10; vertices[2].y = -2; vertices[2].z = -10;
+    vertices[3].x = +10; vertices[3].y = -2; vertices[3].z = +10;
+    rtcUnmapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
+
+    /* set triangles */
+    Triangle* triangles = (Triangle*)rtcMapBuffer(scene, mesh, RTC_INDEX_BUFFER);
+    triangles[0].v0 = 0; triangles[0].v1 = 2; triangles[0].v2 = 1;
+    triangles[1].v0 = 1; triangles[1].v1 = 2; triangles[1].v2 = 3;
+    rtcUnmapBuffer(scene, mesh, RTC_INDEX_BUFFER);
+
+    rtcCommit(scene);
 
     waitForUserExit();
     rtcExit();

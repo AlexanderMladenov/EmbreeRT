@@ -21,9 +21,69 @@
 
 #ifndef __CAMERA_H
 #define __CAMERA_H
+
+using namespace glm;
+inline mat4 CreateRotationMatrix(const vec3& rot)
+{
+    return rotate(radians(rot.x), vec3(1, 0, 0)) *
+        rotate(radians(rot.y), vec3(0, 1, 0)) *
+        rotate(radians(rot.z), vec3(0, 0, 1));
+}
+
 struct Camera
 {
+    Camera::Camera(const vec3& position, const vec3& rot, float fov) :
+    m_Position(position),
+    m_Rotation(rot),
+    m_Fov(fov)
+    {
+        auto x = -((float)FRAME_WIDTH / (float)FRAME_HEIGHT);
+        auto y = 1.f;
 
+        vec3 corner(x, y, 1);
+        vec3 center(0, 0, 1);
+
+        auto scaling = tan(radians(m_Fov * 0.5f)) / (corner - center).length();
+
+        x *= scaling;
+        y *= scaling;
+
+        m_RotationMatrix = CreateRotationMatrix(m_Rotation);
+        m_TopLeft = vec3(m_RotationMatrix * vec4(x, y, 1, 1));
+        m_TopRight = vec3(m_RotationMatrix * vec4(-x, y, 1, 1));
+        m_DownLeft = vec3(m_RotationMatrix * vec4(x, -y, 1, 1));
+
+        m_UpDir = vec3(m_RotationMatrix * vec4(0, 1, 0, 1));
+        m_RightDir = vec3(m_RotationMatrix * vec4(1, 0, 0, 1));
+        m_FrontDir = vec3(m_RotationMatrix * vec4(0, 0, 1, 1));
+
+        m_TopLeft += m_Position;
+        m_TopRight += m_Position;
+        m_DownLeft += m_Position;
+    }
+
+    RTCRay getRay(const int x, const int y) const
+    {
+        RTCRay result;
+        result.org[0] = m_Position.x;
+        result.org[0] = m_Position.y;
+        result.org[0] = m_Position.z;
+
+        vec3 target = m_TopLeft +
+            (m_TopRight - m_TopLeft) * (x / (float)FRAME_WIDTH) +
+            (m_DownLeft - m_TopLeft) * (y / (float)FRAME_HEIGHT);
+
+        result.dir = target - m_Position;
+        normalize(result.dir);
+        return result;
+    }
+
+    vec3 m_TopLeft, m_TopRight, m_DownLeft;
+    vec3 m_FrontDir, m_RightDir, m_UpDir;
+    vec3 m_Position;
+    vec3 m_Rotation;
+    mat4 m_RotationMatrix;
+    float m_Fov;
 };
 
 #endif // __CAMERA_H

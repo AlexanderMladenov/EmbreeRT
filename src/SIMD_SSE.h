@@ -13,11 +13,11 @@ namespace SIMDConstants
     const __m128 sixty = _mm_set1_ps(60.0f);
 
 }
+
 using namespace glm;
+
 namespace SIMD
 {
-
-
     struct Matrix4
     {
 
@@ -139,6 +139,8 @@ namespace SIMD
 
     };
 
+    
+
     inline Vec3Packet operator+(const Vec3Packet& a, const Vec3Packet& b)
     {
         Vec3Packet result;
@@ -211,6 +213,19 @@ namespace SIMD
         a.y = _mm_mul_ps(a.y, x2);
         a.z = _mm_mul_ps(a.z, x2);
     }
+
+    // TODO implementation
+   /* inline Vec3Packet operator*(const Matrix4& mat, const Vec3Packet& vec)
+    {
+        _mm_prefetch((char*)&(mat.m[0][0]), _MM_HINT_T0);
+        Matrix4 matTransp = mat;
+        _MM_TRANSPOSE4_PS(matTransp.rows[0], matTransp.rows[1], matTransp.rows[2], matTransp.rows[3]);
+        Vec3Packet result;
+
+        auto x = Dot(vec, vec);
+
+
+    }*/
 
     inline Vec3Packet And(const Vec3Packet& a, const Vec3Packet& b)
     {
