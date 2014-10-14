@@ -94,6 +94,7 @@ bool InitVideo()
     std::cout << "Seting up SDL took: " << timeSec << " sec " << timeMili - (timeSec * 1000) << " milisec" << std::endl;
     return true;
 }
+
 vec3 Raytrace(RTCRay& ray, const RTCScene& scene)
 {
     rtcIntersect(scene, ray);
@@ -103,6 +104,7 @@ vec3 Raytrace(RTCRay& ray, const RTCScene& scene)
     }
     return vec3(0);
 }
+
 void RenderBuffer(const Camera& cam, vec3 buf[FRAME_WIDTH][FRAME_HEIGHT], const RTCScene& scene)
 {
     for (auto x = 0; x < FRAME_WIDTH; x++)
@@ -115,6 +117,5 @@ void RenderBuffer(const Camera& cam, vec3 buf[FRAME_WIDTH][FRAME_HEIGHT], const 
     }
     SwapBuffers(buf);
 }
-
 
 #endif

@@ -23,6 +23,7 @@
 #define __CAMERA_H
 
 using namespace glm;
+
 inline mat4 CreateRotationMatrix(const vec3& rot)
 {
     return rotate(radians(rot.x), vec3(1, 0, 0)) *
@@ -85,9 +86,44 @@ struct Camera
 
         return result;
     }
-    RTCRay4 GetRayPacket(const int x, const int y)
+
+    RTCRay4 GetRayPacket4(const int x, const int y) const
     {
         RTCRay4 result;
+        auto& pos = m_Position;
+
+        for (auto i = 0; i < 4; i++)
+        {
+            result.orgx[i] = pos.x;
+            result.orgy[i] = pos.y;
+            result.orgz[i] = pos.z;
+        }
+            
+
+        vec3 targets[4];
+        for (auto i = 0; i < 4; i++)
+        {
+            targets[i] = normalize((m_TopLeft +
+                (m_TopRight - m_TopLeft) * ((x + i) / (float)FRAME_WIDTH) +
+                (m_DownLeft - m_TopLeft) * ((y + i) / (float)FRAME_HEIGHT)) - m_Position);
+        }
+
+        for (auto i = 0; i < 4; i++)
+        {
+            result.dirx[i] = targets[i].x;
+            result.diry[i] = targets[i].y;
+            result.dirz[i] = targets[i].z;
+        }
+
+        for (auto i = 0; i < 4; i++)
+        {
+            result.tfar[i] = std::numeric_limits<float>::max();
+            result.tnear[i] = 0.f;
+            result.time[i] = 0.f;
+            result.geomID[i] = RTC_INVALID_GEOMETRY_ID;
+            result.primID[i] = RTC_INVALID_GEOMETRY_ID;
+            result.mask[i] = -1;
+        }
 
         return result;
     }

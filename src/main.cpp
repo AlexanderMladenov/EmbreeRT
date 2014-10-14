@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <vector>
 
 #include <SDL.h>
 #include <embree2/rtcore.h>
