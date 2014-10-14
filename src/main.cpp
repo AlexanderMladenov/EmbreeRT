@@ -94,8 +94,12 @@ int main(int argc, char* argv[])
     triangles[1].v0 = 1; triangles[1].v1 = 2; triangles[1].v2 = 3;
     rtcUnmapBuffer(scene, mesh, RTC_INDEX_BUFFER);
     rtcCommit(scene);
-
+    auto t1 = std::chrono::high_resolution_clock::now();
     RenderBuffer(cam, FrameBuf, scene);
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto time = timePast(t1, t2);
+    auto time2 = timePast<std::chrono::milliseconds>(t1, t2);
+    std::cout << "Rendering took " << time << " sec " << time2 << " milsec" << std::endl;
     waitForUserExit();
     rtcExit();
     SDL_Quit();
