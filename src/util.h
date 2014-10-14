@@ -18,7 +18,7 @@ namespace embRT
 
     typedef  std::chrono::time_point<std::chrono::high_resolution_clock> TimePoint;
     template <typename T = std::chrono::seconds>
-    long long timePast(const TimePoint& start, const TimePoint& end)
+    auto timePast(const TimePoint& start, const TimePoint& end) -> long long
     {
         return std::chrono::duration_cast<T>(end - start).count();
     }
