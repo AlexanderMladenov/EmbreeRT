@@ -37,6 +37,7 @@
 #include "constants.h"
 #include "SIMD_SSE.h"
 
+#include "util.h"
 #include "camera.h"
 #include "renderer.h"
 
@@ -61,6 +62,7 @@ struct Vertex { float x, y, z, r; };
 struct Triangle { int v0, v1, v2; };
 vec3 FrameBuf[FRAME_WIDTH][FRAME_HEIGHT];
 
+using namespace embRT;
 #undef main
 int main(int argc, char* argv[])
 {
@@ -74,7 +76,8 @@ int main(int argc, char* argv[])
         return -1;
     }
     rtcSetErrorFunction(error_handler);
-    Camera cam(vec3(0, 0, 5), vec3(10, 0, 0), 75);
+
+    Camera cam(vec3(0, 2, -5), vec3(20, 0, 0), 75);
 
     RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT1);
 
@@ -97,7 +100,7 @@ int main(int argc, char* argv[])
     rtcCommit(scene);
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    RenderBuffer(cam, FrameBuf, scene);
+    RenderToBuffer(cam, FrameBuf, scene);
     auto t2 = std::chrono::high_resolution_clock::now();
     auto time = timePast(t1, t2);
     auto time2 = timePast<std::chrono::milliseconds>(t1, t2);

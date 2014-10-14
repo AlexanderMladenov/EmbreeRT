@@ -149,6 +149,7 @@
     <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\renderer.h" />
     <ClInclude Include="..\src\SIMD_SSE.h" />
+    <ClInclude Include="..\src\util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
