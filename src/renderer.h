@@ -1,10 +1,6 @@
 #ifndef __RENDERER_H
 #define __RENDERER_H
-
-float frameR[FRAME_WIDTH][FRAME_HEIGHT];
-float frameG[FRAME_WIDTH][FRAME_HEIGHT];
-float frameB[FRAME_WIDTH][FRAME_HEIGHT];
-
+vec3 FrameBuf[FRAME_WIDTH][FRAME_HEIGHT];
 SDL_Window* m_Window = nullptr;
 SDL_Surface* m_Surface = nullptr;
 
@@ -18,12 +14,12 @@ auto clamp(T x, T a, T b) -> T
     return x <= a ? a : x >= b ? b : x;
 }
 
-std::uint32_t ConvertPixel(float pr, float pg, float pb)
+std::uint32_t ConvertPixel(const vec3& pixel)
 {
     std::uint8_t r, g, b;
-    r = (Uint8) (::clamp(pr, 0.f, 1.f) * 255);
-    g = (Uint8) (::clamp(pg, 0.f, 1.f) * 255);
-    b = (Uint8) (::clamp(pb, 0.f, 1.f) * 255);
+    r = (Uint8) (::clamp(pixel.r, 0.f, 1.f) * 255);
+    g = (Uint8)(::clamp(pixel.g, 0.f, 1.f) * 255);
+    b = (Uint8)(::clamp(pixel.b, 0.f, 1.f) * 255);
 
     return (b << blueShift) | (g << greenShift) | (r << redShift);
 }
@@ -36,7 +32,7 @@ void SwapBuffers()
     {
         Uint32 *row = (Uint32*) ((Uint8*) m_Surface->pixels + y * m_Surface->pitch);
         for (int x = 0; x < FRAME_WIDTH; x++)
-            row[x] = ConvertPixel(frameR[x][y], frameG[x][y], frameB[x][y]);
+            row[x] = ConvertPixel(FrameBuf[x][y]);
     }
     SDL_UpdateWindowSurface(m_Window);
 }

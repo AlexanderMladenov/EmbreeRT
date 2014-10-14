@@ -48,7 +48,7 @@ void error_handler(const RTCError code)
         case RTC_UNSUPPORTED_CPU: printf("RTC_UNSUPPORTED_CPU"); break;
         default: printf("invalid error code"); break;
     }
-    abort();
+    exit(-2);
 }
 /* vertex and triangle layout */
 struct Vertex { float x, y, z, r; };
