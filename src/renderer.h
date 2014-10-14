@@ -105,6 +105,8 @@ vec3 Raytrace(RTCRay& ray, const RTCScene& scene)
     return vec3(0);
 }
 
+//__aligned(16) int valid4[4] = { -1, -1, -1, -1 };
+
 void RenderBuffer(const Camera& cam, vec3 buf[FRAME_WIDTH][FRAME_HEIGHT], const RTCScene& scene)
 {
     for (auto x = 0; x < FRAME_WIDTH; x++)

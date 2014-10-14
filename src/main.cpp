@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
         return -1;
     }
     rtcSetErrorFunction(error_handler);
-    Camera cam(vec3(0, 0, 0), vec3(10, 0, 0), 75);
+    Camera cam(vec3(0, 0, 5), vec3(10, 0, 0), 75);
 
     RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT1);
 

@@ -92,13 +92,13 @@ struct Camera
         RTCRay4 result;
         auto& pos = m_Position;
 
-        for (auto i = 0; i < 4; i++)
-        {
-            result.orgx[i] = pos.x;
-            result.orgy[i] = pos.y;
-            result.orgz[i] = pos.z;
-        }
-            
+        __m128 a = _mm_set1_ps(pos.x);
+        __m128 b = _mm_set1_ps(pos.y);
+        __m128 c = _mm_set1_ps(pos.z);
+
+        memcpy(result.orgx, &a, sizeof(a));
+        memcpy(result.orgy, &b, sizeof(b));
+        memcpy(result.orgz, &c, sizeof(c));
 
         vec3 targets[4];
         for (auto i = 0; i < 4; i++)
@@ -124,7 +124,6 @@ struct Camera
             result.primID[i] = RTC_INVALID_GEOMETRY_ID;
             result.mask[i] = -1;
         }
-
         return result;
     }
 
