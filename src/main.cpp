@@ -73,6 +73,7 @@ int main(int argc, char* argv[])
         return -1;
     }
     rtcSetErrorFunction(error_handler);
+    Camera cam(vec3(0, 0, -5), vec3(0), 75.f);
 
     RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT1);
 
@@ -92,8 +93,15 @@ int main(int argc, char* argv[])
     triangles[0].v0 = 0; triangles[0].v1 = 2; triangles[0].v2 = 1;
     triangles[1].v0 = 1; triangles[1].v1 = 2; triangles[1].v2 = 3;
     rtcUnmapBuffer(scene, mesh, RTC_INDEX_BUFFER);
-
     rtcCommit(scene);
+
+    for (auto x = 0; x < FRAME_WIDTH; x++)
+    {
+        for (auto y = 0; y < FRAME_HEIGHT; y++)
+        {
+            auto r = cam.getRay(x, y);
+        }
+    }
 
     waitForUserExit();
     rtcExit();

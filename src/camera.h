@@ -66,15 +66,23 @@ struct Camera
     {
         RTCRay result;
         result.org[0] = m_Position.x;
-        result.org[0] = m_Position.y;
-        result.org[0] = m_Position.z;
+        result.org[1] = m_Position.y;
+        result.org[2] = m_Position.z;
 
-        vec3 target = m_TopLeft +
+        vec3 target = normalize((m_TopLeft +
             (m_TopRight - m_TopLeft) * (x / (float)FRAME_WIDTH) +
-            (m_DownLeft - m_TopLeft) * (y / (float)FRAME_HEIGHT);
+            (m_DownLeft - m_TopLeft) * (y / (float)FRAME_HEIGHT)) - m_Position);
 
-        result.dir = target - m_Position;
-        normalize(result.dir);
+        result.dir[0] = target.x;
+        result.dir[1] = target.y;
+        result.dir[2] = target.z;
+        result.tfar = std::numeric_limits<float>::max();
+        result.tnear = 0.f;
+        result.time = 0.f;
+        result.geomID = RTC_INVALID_GEOMETRY_ID;
+        result.primID = RTC_INVALID_GEOMETRY_ID;
+        result.mask = -1;
+
         return result;
     }
 

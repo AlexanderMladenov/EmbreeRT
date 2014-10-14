@@ -139,8 +139,6 @@ namespace SIMD
 
     };
 
-    
-
     inline Vec3Packet operator+(const Vec3Packet& a, const Vec3Packet& b)
     {
         Vec3Packet result;

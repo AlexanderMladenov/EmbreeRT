@@ -100,13 +100,7 @@ bool initVideo()
 
 vec3 Raytrace(const RTCRay& ray)
 {
-    for (auto x = 0; x < FRAME_WIDTH; x++)
-    {
-        for (auto y = 0; y < FRAME_HEIGHT; y++)
-        {
-            FrameBuf[x][y] = vec3(1, 0.3, 0);
-        }
-    }
+
     return vec3(0);
 }
 
