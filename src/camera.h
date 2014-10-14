@@ -62,7 +62,7 @@ struct Camera
         m_DownLeft += m_Position;
     }
 
-    RTCRay getRay(const int x, const int y) const
+    RTCRay GetRay(const int x, const int y) const
     {
         RTCRay result;
         result.org[0] = m_Position.x;
@@ -82,6 +82,12 @@ struct Camera
         result.geomID = RTC_INVALID_GEOMETRY_ID;
         result.primID = RTC_INVALID_GEOMETRY_ID;
         result.mask = -1;
+
+        return result;
+    }
+    RTCRay4 GetRayPacket(const int x, const int y)
+    {
+        RTCRay4 result;
 
         return result;
     }

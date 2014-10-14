@@ -36,7 +36,7 @@ void SwapBuffers(const vec3 buf[FRAME_WIDTH][FRAME_HEIGHT])
     SDL_UpdateWindowSurface(m_Window);
 }
 
-void waitForUserExit()
+void WaitForUserExit()
 {
     SDL_Event e;
     bool wantExit = false;
@@ -58,7 +58,7 @@ inline long long timePast(const TimePoint& start, const TimePoint& end)
     return std::chrono::duration_cast<T>(end - start).count();
 }
 
-bool initVideo()
+bool InitVideo()
 {
     auto begin = std::chrono::high_resolution_clock::now();
     if (SDL_Init(SDL_INIT_EVERYTHING != 0))
@@ -109,7 +109,7 @@ void RenderBuffer(const Camera& cam, vec3 buf[FRAME_WIDTH][FRAME_HEIGHT], const 
     {
         for (auto y = 0; y < FRAME_HEIGHT; y++)
         {
-            auto r = cam.getRay(x, y);
+            auto r = cam.GetRay(x, y);
             buf[x][y] = Raytrace(r, scene);
         }
     }
