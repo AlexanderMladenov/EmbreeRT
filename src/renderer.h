@@ -97,8 +97,6 @@ namespace embRT
         return vec3(0);
     }
 
-    //__aligned(16) int valid4[4] = { -1, -1, -1, -1 };
-
     void RenderToBuffer(const Camera& cam, vec3 buf[FRAME_WIDTH][FRAME_HEIGHT], const RTCScene& scene)
     {
         for (auto x = 0; x < FRAME_WIDTH; x++)
@@ -112,5 +110,40 @@ namespace embRT
         }
         SwapBuffers(buf);
     }
+
+    std::vector<vec3> Raytrace4(RTCRay4& rays, const RTCScene& scene)
+    {
+        std::vector<vec3> result(4, vec3(0, 0, 1));
+        __declspec(align(16)) int valid4[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+
+        rtcIntersect4(valid4, scene, rays);
+        for (auto i = 0; i < 4; i++)
+        {
+            if (rays.geomID[i] != RTC_INVALID_GEOMETRY_ID)
+            {
+                result[i] = vec3(1, 0, 0);
+            }
+        }
+        return result;
+    }
+
+    void RenderToBuffer4(const Camera& cam, vec3 buf[FRAME_WIDTH][FRAME_HEIGHT], const RTCScene& scene)
+    {
+        for (auto x = 0; x < FRAME_WIDTH; x++)
+        {
+            for (auto y = 0; y < FRAME_HEIGHT / 4; y += 4)
+            {
+                auto rayP = cam.GetRayPacket4(x, y);
+                auto colors = Raytrace4(rayP, scene);
+                buf[x][y + 0] = colors[0];
+                buf[x][y + 1] = colors[1];
+                buf[x][y + 2] = colors[2];
+                buf[x][y + 3] = colors[3];
+            }
+        }
+        SwapBuffers(buf);
+    }
+
+
 } // namespace embRT
 #endif

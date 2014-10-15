@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 
     Camera cam(vec3(0, 2, -5), vec3(20, 0, 0), 75);
 
-    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT1);
+    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT4);
 
     /* create a triangulated plane with 2 triangles and 4 vertices */
     unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, 2, 4);
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
     rtcCommit(scene);
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    RenderToBuffer(cam, FrameBuf, scene);
+    RenderToBuffer4(cam, FrameBuf, scene);
     auto t2 = std::chrono::high_resolution_clock::now();
     auto time = timePast(t1, t2);
     auto time2 = timePast<std::chrono::milliseconds>(t1, t2);

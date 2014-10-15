@@ -87,10 +87,10 @@ namespace embRT
             RTCRay4 result;
             auto& pos = m_Position;
 
+            // assign origins
             __m128 positionsX = _mm_set1_ps(pos.x);
             __m128 positionsY = _mm_set1_ps(pos.y);
             __m128 positionsZ = _mm_set1_ps(pos.z);
-
             memcpy(result.orgx, &positionsX, sizeof(positionsX));
             memcpy(result.orgy, &positionsY, sizeof(positionsY));
             memcpy(result.orgz, &positionsZ, sizeof(positionsZ));
@@ -99,9 +99,10 @@ namespace embRT
             for (auto i = 0; i < 4; i++)
             {
                 targets[i] = normalize((m_TopLeft +
-                    (m_TopRight - m_TopLeft) * ((x + i) / (float)FRAME_WIDTH) +
+                    (m_TopRight - m_TopLeft) * ((x) / (float)FRAME_WIDTH) +
                     (m_DownLeft - m_TopLeft) * ((y + i) / (float)FRAME_HEIGHT)) - m_Position);
             }
+            // assign directions
             __m128 directionsX = _mm_set_ps(targets[0].x, targets[1].x, targets[2].x, targets[3].x);
             __m128 directionsY = _mm_set_ps(targets[0].y, targets[1].y, targets[2].y, targets[3].y);
             __m128 directionsZ = _mm_set_ps(targets[0].z, targets[1].z, targets[2].z, targets[3].z);
@@ -114,10 +115,10 @@ namespace embRT
             memcpy(result.time, &SIMDConstants::zero, sizeof(SIMDConstants::zero)); // time = 0;
 
             __m128i geomIDs = _mm_set1_epi32(RTC_INVALID_GEOMETRY_ID);
-            memcpy(result.geomID, &geomIDs, sizeof(geomIDs)); // set all geomIDs to RTC_INVALID_GEOMETRY_ID
-            memcpy(result.primID, &geomIDs, sizeof(geomIDs)); // set all primIDs to RTC_INVALID_GEOMETRY_ID
+            memcpy(result.geomID, &geomIDs, sizeof(geomIDs)); // geomIDs = RTC_INVALID_GEOMETRY_ID
+            memcpy(result.primID, &geomIDs, sizeof(geomIDs)); // geomIDs = RTC_INVALID_GEOMETRY_ID
             __m128i maskIDs = _mm_set1_epi32(-1);
-            memcpy(result.mask, &maskIDs, sizeof(maskIDs));
+            memcpy(result.mask, &maskIDs, sizeof(maskIDs)); // geom mask = -1
 
             return result;
         }
