@@ -19,16 +19,62 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE. */
 
-#ifndef __CONSTANTS_H
-#define __CONSTANTS_H
+
+#ifndef __OBJREADER_H
+#define __OBJREADER_H
+
+using std::tuple;
+using std::vector;
 
 namespace embRT
 {
-#define FRAME_WIDTH 1280
-#define FRAME_HEIGHT 720
-#define PI 3.14159265359
-#define PI2 6.28318530718
-#define PIHALF 1.57079632679
-} // namespace embRT
+    struct Vertex { float x, y, z, dummy; };
+    struct Triangle { int v0, v1, v2; };
+
+    typedef tuple<vector<float>, vector<float>, vector<float>> PositionsNormalsUVs;
+    std::string strip(const std::string& s)
+    {
+        size_t spacesFront = 0;
+        size_t spacesBack = 0;
+
+        for (char c : s)
+        {
+            if (c != ' ')
+            {
+                break;
+            }
+
+            spacesFront++;
+        }
+
+        for (auto it = s.rbegin(); it != s.rend(); it++)
+        {
+            if (*it != ' ')
+            {
+                break;
+            }
+
+            spacesBack++;
+        }
+
+        std::stringstream ss;
+        for (auto it = s.begin() + spacesFront; it != s.end() - spacesBack; it++)
+        {
+            if (it < s.end() - spacesBack - 1)
+            {
+                if (*it == ' ' && *(it + 1) == ' ')
+                {
+                    continue;
+                }
+            }
+
+            ss << *it;
+        }
+
+        auto s = ss.str();
+        return s;
+    }
+
+}
 
 #endif

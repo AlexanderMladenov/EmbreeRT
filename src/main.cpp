@@ -21,7 +21,11 @@
 
 #include <iostream>
 #include <chrono>
+#include <array>
 #include <vector>
+#include <tuple>
+#include <string>
+#include <sstream>
 
 #include <SDL.h>
 #include <embree2/rtcore.h>
@@ -39,6 +43,7 @@
 
 #include "util.h"
 #include "camera.h"
+#include "objReader.h"
 #include "renderer.h"
 
 
@@ -58,8 +63,7 @@ void error_handler(const RTCError code, const char* str)
     exit(-2);
 }
 /* vertex and triangle layout */
-struct Vertex { float x, y, z, r; };
-struct Triangle { int v0, v1, v2; };
+
 vec3 FrameBuf[FRAME_WIDTH][FRAME_HEIGHT];
 
 using namespace embRT;
@@ -77,9 +81,9 @@ int main(int argc, char* argv[])
     }
     rtcSetErrorFunction(error_handler);
 
-    Camera cam(vec3(0, 2, -5), vec3(20, 0, 0), 75);
+    Camera cam(vec3(0, 38, 0), vec3(90, 0, 0), 75);
 
-    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT4);
+    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC, RTC_INTERSECT4);
 
     /* create a triangulated plane with 2 triangles and 4 vertices */
     unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, 2, 4);
