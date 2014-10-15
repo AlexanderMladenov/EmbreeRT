@@ -87,13 +87,13 @@ namespace embRT
             RTCRay4 result;
             auto& pos = m_Position;
 
-            __m128 a = _mm_set1_ps(pos.x);
-            __m128 b = _mm_set1_ps(pos.y);
-            __m128 c = _mm_set1_ps(pos.z);
+            __m128 positionsX = _mm_set1_ps(pos.x);
+            __m128 positionsY = _mm_set1_ps(pos.y);
+            __m128 positionsZ = _mm_set1_ps(pos.z);
 
-            memcpy(result.orgx, &a, sizeof(a));
-            memcpy(result.orgy, &b, sizeof(b));
-            memcpy(result.orgz, &c, sizeof(c));
+            memcpy(result.orgx, &positionsX, sizeof(positionsX));
+            memcpy(result.orgy, &positionsY, sizeof(positionsY));
+            memcpy(result.orgz, &positionsZ, sizeof(positionsZ));
 
             vec3 targets[4];
             for (auto i = 0; i < 4; i++)
@@ -102,23 +102,24 @@ namespace embRT
                     (m_TopRight - m_TopLeft) * ((x + i) / (float)FRAME_WIDTH) +
                     (m_DownLeft - m_TopLeft) * ((y + i) / (float)FRAME_HEIGHT)) - m_Position);
             }
+            __m128 directionsX = _mm_set_ps(targets[0].x, targets[1].x, targets[2].x, targets[3].x);
+            __m128 directionsY = _mm_set_ps(targets[0].y, targets[1].y, targets[2].y, targets[3].y);
+            __m128 directionsZ = _mm_set_ps(targets[0].z, targets[1].z, targets[2].z, targets[3].z);
+            memcpy(result.dirx, &directionsX, sizeof(directionsX));
+            memcpy(result.diry, &directionsY, sizeof(directionsY));
+            memcpy(result.dirz, &directionsZ, sizeof(directionsZ));
+
+            memcpy(result.tfar, &SIMDConstants::infinity, sizeof(SIMDConstants::infinity)); // tfar = inf;
+            memcpy(result.tnear, &SIMDConstants::zero, sizeof(SIMDConstants::zero)); // tnear = 0;
+            memcpy(result.time, &SIMDConstants::zero, sizeof(SIMDConstants::zero)); // time = 0;
+            memcpy(result.mask, &SIMDConstants::minusOne, sizeof(SIMDConstants::minusOne)); // mask = -1;
 
             for (auto i = 0; i < 4; i++)
             {
-                result.dirx[i] = targets[i].x;
-                result.diry[i] = targets[i].y;
-                result.dirz[i] = targets[i].z;
-            }
-
-            for (auto i = 0; i < 4; i++)
-            {
-                result.tfar[i] = std::numeric_limits<float>::max();
-                result.tnear[i] = 0.f;
-                result.time[i] = 0.f;
                 result.geomID[i] = RTC_INVALID_GEOMETRY_ID;
                 result.primID[i] = RTC_INVALID_GEOMETRY_ID;
-                result.mask[i] = -1;
             }
+
             return result;
         }
 

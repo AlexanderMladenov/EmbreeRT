@@ -13,6 +13,7 @@ namespace embRT
         const __m128 two = _mm_set1_ps(2.0f);
         const __m128 three = _mm_set1_ps(3.0f);
         const __m128 sixty = _mm_set1_ps(60.0f);
+        const __m128 infinity = _mm_set1_ps(std::numeric_limits<float>::max());
 
     }
 

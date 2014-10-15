@@ -106,10 +106,10 @@ namespace embRT
             for (auto y = 0; y < FRAME_HEIGHT; y++)
             {
                 auto r = cam.GetRay(x, y);
+                auto rr = cam.GetRayPacket4(x, y);
                 buf[x][y] = Raytrace(r, scene);
             }
         }
-
         SwapBuffers(buf);
     }
 } // namespace embRT
