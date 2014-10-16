@@ -43,7 +43,7 @@ namespace embRT
 
     using namespace glm;
 
-    void SwapBuffers(const std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf)
+    void SwapBuffers(const FrameBuffer& buf)
     {
         for (int y = 0; y < FRAME_HEIGHT; y++)
         {
@@ -69,7 +69,6 @@ namespace embRT
             }
         }
     }
-
 
     bool InitVideo()
     {
@@ -118,7 +117,7 @@ namespace embRT
         return vec3(0);
     }
 
-    void RenderToBuffer(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf, const RTCScene& scene)
+    void RenderToBuffer(const Camera& cam, FrameBuffer& buf, const RTCScene& scene)
     {
         for (auto x = 0; x < FRAME_WIDTH; x++)
         {
@@ -131,38 +130,32 @@ namespace embRT
         SwapBuffers(buf);
     }
 
-    std::array<vec3, 4> Raytrace4(RTCRay4& rays, const RTCScene& scene, const Camera& cam, const std::array<vec3, 4>& tars)
+    std::array<vec3, 4> Raytrace4(RTCRay4& rays, const RTCScene& scene)
     {
         std::array<vec3, 4> result;
-        __m128i valid4 = _mm_set1_epi32(0xFFFFFFFF);
+        __m128i traceMask = _mm_set1_epi32(0xFFFFFFFF);
 
-        rtcIntersect4(&valid4, scene, rays);
+        rtcIntersect4(&traceMask, scene, rays);
         for (auto i = 0; i < 4; i++)
         {
             if (rays.geomID[i] != RTC_INVALID_GEOMETRY_ID)
             {
-                if (rays.primID[i] == 0)
-                    result[i] = vec3(1, 0.3, 0);
-                else if (rays.primID[i] == 1)
-                    result[i] = vec3(1, 0.3, 1);
+                result[i] = vec3(1, 0.3, 0);
             }
         }
         return result;
     }
 
-    void RenderToBuffer4(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf, const RTCScene& scene)
+    void RenderToBuffer4(const Camera& cam, FrameBuffer& buf, const RTCScene& scene)
     {
         for (auto x = 0; x < FRAME_WIDTH; x += 4)
         {
             for (auto y = 0; y < FRAME_HEIGHT; y++)
             {
-                std::array<vec3, 4> targets;
-                auto rayP = cam.GetRayPacket4(x, y, targets);
-                auto colors = Raytrace4(rayP, scene, cam, targets);
-                buf[x + 0][y] = colors[3];
-                buf[x + 1][y] = colors[2];
-                buf[x + 2][y] = colors[1];
-                buf[x + 3][y] = colors[0];
+                auto rayP = cam.GetRayPacket4(x, y);
+                auto colors = Raytrace4(rayP, scene);
+                for (auto i = 0; i < 4; i++)
+                    buf[x + i][y] = colors[3 - i];
             }
         }
         SwapBuffers(buf);

@@ -63,7 +63,8 @@ void error_handler(const RTCError code, const char* str)
     exit(-2);
 }
 
-std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> FrameBuf;
+typedef std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> FrameBuffer;
+FrameBuffer FrameBuf;
 
 using namespace embRT;
 #undef main
@@ -80,7 +81,7 @@ int main(int argc, char* argv[])
     }
     rtcSetErrorFunction(error_handler);
 
-    Camera cam(vec3(-8.0, 38, 0), vec3(90, 0, 0), 75);
+    Camera cam(vec3(0, 38, 0), vec3(90, 0, 0), 75);
 
     RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT4);
 
