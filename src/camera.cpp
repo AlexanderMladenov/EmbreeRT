@@ -95,7 +95,7 @@ namespace embRT
         return result;
     }
 
-    RTCRay4 Camera::GetRayPacket4(const int x, const int y) const
+    RTCRay4 Camera::GetRayPacket4(const int x, const int y, std::array<vec3, 4>& tars) const
     {
         RTCRay4 result;
         auto& pos = m_Position;
@@ -108,13 +108,14 @@ namespace embRT
         memcpy(result.orgy, &positionsY, sizeof(positionsY));
         memcpy(result.orgz, &positionsZ, sizeof(positionsZ));
 
-        vec3 targets[4];
+        std::array<vec3, 4> targets;
         for (auto i = 0; i < 4; i++)
         {
             targets[i] = normalize((m_TopLeft +
-                (m_TopRight - m_TopLeft) * ((x + i) / (float)FRAME_WIDTH) +
+                (m_TopRight - m_TopLeft) * ((x + i) / (float)FRAME_WIDTH) + // setting i to a const value (0 , 1,2 ,3) or removig it fixes the issue ?!?
                 (m_DownLeft - m_TopLeft) * ((y) / (float)FRAME_HEIGHT)) - m_Position);
         }
+        tars = targets;
         // assign directions
         __m128 directionsX = _mm_set_ps(targets[0].x, targets[1].x, targets[2].x, targets[3].x);
         __m128 directionsY = _mm_set_ps(targets[0].y, targets[1].y, targets[2].y, targets[3].y);

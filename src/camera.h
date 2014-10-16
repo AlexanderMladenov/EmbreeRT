@@ -31,7 +31,7 @@ namespace embRT
         Camera::Camera(const vec3& position, const vec3& rot, float fov);
 
         RTCRay GetRay(const int x, const int y) const;
-        RTCRay4 GetRayPacket4(const int x, const int y) const;
+        RTCRay4 GetRayPacket4(const int x, const int y, std::array<vec3, 4>& targets) const;
 
         vec3 m_TopLeft, m_TopRight, m_DownLeft;
         vec3 m_FrontDir, m_RightDir, m_UpDir;
