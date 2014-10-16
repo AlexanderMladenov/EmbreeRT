@@ -159,10 +159,10 @@ namespace embRT
                 std::array<vec3, 4> targets;
                 auto rayP = cam.GetRayPacket4(x, y, targets);
                 auto colors = Raytrace4(rayP, scene, cam, targets);
-                buf[x + 0][y] = colors[0];
-                buf[x + 1][y] = colors[1];
-                buf[x + 2][y] = colors[2];
-                buf[x + 3][y] = colors[3];
+                buf[x + 0][y] = colors[3];
+                buf[x + 1][y] = colors[2];
+                buf[x + 2][y] = colors[1];
+                buf[x + 3][y] = colors[0];
             }
         }
         SwapBuffers(buf);
