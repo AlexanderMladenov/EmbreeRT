@@ -62,9 +62,8 @@ void error_handler(const RTCError code, const char* str)
     }
     exit(-2);
 }
-/* vertex and triangle layout */
 
-vec3 FrameBuf[FRAME_WIDTH][FRAME_HEIGHT];
+std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> FrameBuf;
 
 using namespace embRT;
 #undef main
@@ -81,9 +80,9 @@ int main(int argc, char* argv[])
     }
     rtcSetErrorFunction(error_handler);
 
-    Camera cam(vec3(0, 38, 0), vec3(90, 0, 0), 75);
+    Camera cam(vec3(-8.0, 38, 0), vec3(90, 0, 0), 75);
 
-    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC, RTC_INTERSECT4);
+    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT4);
 
     /* create a triangulated plane with 2 triangles and 4 vertices */
     unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, 2, 4);
