@@ -25,6 +25,7 @@
 
 using std::tuple;
 using std::vector;
+using std::string;
 
 namespace embRT
 {
@@ -32,7 +33,9 @@ namespace embRT
     struct Triangle { int v0, v1, v2; };
 
     typedef tuple<vector<float>, vector<float>, vector<float>> PositionsNormalsUVs;
-    std::string strip(const std::string& s)
+    vector<string> lines;
+
+    string strip(const string& s)
     {
         size_t spacesFront = 0;
         size_t spacesBack = 0;
@@ -71,10 +74,112 @@ namespace embRT
             ss << *it;
         }
 
-        auto s = ss.str();
-        return s;
+        return ss.str();
     }
 
+    auto split(const string& s, char delim) -> vector<string>
+    {
+        vector<string> elems;
+        std::stringstream ss(s);
+        string item;
+        while (getline(ss, item, delim))
+        {
+            elems.push_back(item);
+        }
+        return elems;
+    }
+
+    auto splitNewlines(const string& s) -> size_t
+    {
+        char* ptr = (char*)s.c_str();
+        char* start = ptr;
+
+        size_t newLinesCount = 0;
+
+        for (auto i = 0u; i < s.size(); i++)
+        {
+            if (ptr[i] == '\n')
+            {
+                ptr[i] = '\0';
+                auto length = (ptr + i) - start;
+                lines.emplace_back(start, length);
+                start = ptr + i + 1;
+            }
+        }
+        return lines.size();
+    }
+
+    auto readFile(const string& fileName) -> vector<string>&
+    {
+        std::cout << "Reading file: " << fileName << std::endl;
+
+        std::ifstream f(fileName);
+        if (!f.is_open())
+        {
+            throw std::runtime_error("error opening file");
+        }
+
+        string s;
+
+        f.seekg(0, std::ios::end);
+        auto length = f.tellg();
+        s.reserve(length);
+        f.seekg(0, std::ios::beg);
+
+        s.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
+
+        auto linesCount = splitNewlines(s);
+
+        std::cout << "Done! " << linesCount << " lines read" << std::endl;
+        return lines;
+    }
+
+    auto extractVertices(size_t startLine, size_t endLine) -> PositionsNormalsUVs
+    {
+        vector<float> positions;
+        vector<float> normals;
+        vector<float> uvs;
+
+        for (auto l = startLine; l < endLine; l++)
+        {
+            auto line = lines[l];
+            auto stripped = strip(line);
+
+            if (line.size() < 6)
+            {
+                continue;
+            }
+
+            auto components = split(stripped, ' ');
+
+            if (stripped[0] == '#')
+            {
+                continue;
+            }
+
+            if (components[0] == "v")
+            {
+                positions.push_back(stof(components[1]));
+                positions.push_back(stof(components[2]));
+                positions.push_back(stof(components[3]));
+            }
+
+            if (components[0] == "vn")
+            {
+                normals.push_back(stof(components[1]));
+                normals.push_back(stof(components[2]));
+                normals.push_back(stof(components[3]));
+            }
+
+            if (components[0] == "vt")
+            {
+                uvs.push_back(stof(components[1]));
+                uvs.push_back(stof(components[2]));
+            }
+        }
+
+        return PositionsNormalsUVs(positions, normals, uvs);
+    }
 }
 
 #endif

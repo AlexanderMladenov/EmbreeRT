@@ -43,7 +43,7 @@ namespace embRT
 
     using namespace glm;
 
-    void SwapBuffers(const FrameBuffer& buf)
+    void SwapBuffers(const std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> & buf)
     {
         for (int y = 0; y < FRAME_HEIGHT; y++)
         {
@@ -107,29 +107,6 @@ namespace embRT
         return true;
     }
 
-    vec3 Raytrace(RTCRay& ray, const RTCScene& scene)
-    {
-        rtcIntersect(scene, ray);
-        if (ray.geomID != RTC_INVALID_GEOMETRY_ID)
-        {
-            return vec3(1, 0.3, 0);
-        }
-        return vec3(0);
-    }
-
-    void RenderToBuffer(const Camera& cam, FrameBuffer& buf, const RTCScene& scene)
-    {
-        for (auto x = 0; x < FRAME_WIDTH; x++)
-        {
-            for (auto y = 0; y < FRAME_HEIGHT; y++)
-            {
-                auto r = cam.GetRay(x, y);
-                buf[x][y] = Raytrace(r, scene);
-            }
-        }
-        SwapBuffers(buf);
-    }
-
     std::array<vec3, 4> Raytrace4(RTCRay4& rays, const RTCScene& scene)
     {
         std::array<vec3, 4> result;
@@ -146,16 +123,16 @@ namespace embRT
         return result;
     }
 
-    void RenderToBuffer4(const Camera& cam, FrameBuffer& buf, const RTCScene& scene)
+    void RenderToBuffer4(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf, const RTCScene& scene)
     {
-        for (auto x = 0; x < FRAME_WIDTH; x += 4)
+        for (auto x = 0; x < FRAME_WIDTH; x++)
         {
-            for (auto y = 0; y < FRAME_HEIGHT; y++)
+            for (auto y = 0; y < FRAME_HEIGHT; y+=4)
             {
                 auto rayP = cam.GetRayPacket4(x, y);
                 auto colors = Raytrace4(rayP, scene);
                 for (auto i = 0; i < 4; i++)
-                    buf[x + i][y] = colors[3 - i];
+                    buf[x][y + i] = colors[3 - i];
             }
         }
         SwapBuffers(buf);

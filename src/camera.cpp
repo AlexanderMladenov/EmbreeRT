@@ -112,8 +112,8 @@ namespace embRT
         for (auto i = 0; i < 4; i++)
         {
             targets[i] = normalize((m_TopLeft +
-                (m_TopRight - m_TopLeft) * ((x + i) / (float)FRAME_WIDTH) + 
-                (m_DownLeft - m_TopLeft) * ((y) / (float)FRAME_HEIGHT)) - m_Position);
+                (m_TopRight - m_TopLeft) * ((x) / (float)FRAME_WIDTH) + 
+                (m_DownLeft - m_TopLeft) * ((y + i) / (float)FRAME_HEIGHT)) - m_Position);
         }
         // assign directions
         __m128 directionsX = _mm_set_ps(targets[0].x, targets[1].x, targets[2].x, targets[3].x);

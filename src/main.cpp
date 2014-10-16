@@ -26,6 +26,7 @@
 #include <tuple>
 #include <string>
 #include <sstream>
+#include <fstream>
 
 #include <SDL.h>
 #include <embree2/rtcore.h>
@@ -62,9 +63,9 @@ void error_handler(const RTCError code, const char* str)
     }
     exit(-2);
 }
-
-typedef std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> FrameBuffer;
-FrameBuffer FrameBuf;
+namespace embRT{
+     std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> FrameBuf;
+}
 
 using namespace embRT;
 #undef main
@@ -81,7 +82,7 @@ int main(int argc, char* argv[])
     }
     rtcSetErrorFunction(error_handler);
 
-    Camera cam(vec3(0, 38, 0), vec3(90, 0, 0), 75);
+    Camera cam(vec3(-9, 6, 0), vec3(90, 0, 0), 75);
 
     RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT4);
 
@@ -103,6 +104,8 @@ int main(int argc, char* argv[])
     rtcUnmapBuffer(scene, mesh, RTC_INDEX_BUFFER);
     rtcCommit(scene);
 
+    auto f = readFile("../meshes/teapot_lowres.obj");
+    auto a = extractVertices(0, f.size());
     auto t1 = std::chrono::high_resolution_clock::now();
     RenderToBuffer4(cam, FrameBuf, scene);
     auto t2 = std::chrono::high_resolution_clock::now();
