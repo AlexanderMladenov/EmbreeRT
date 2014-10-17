@@ -29,11 +29,28 @@ using std::string;
 
 namespace embRT
 {
-    struct Vertex { float x, y, z, dummy; };
-    struct Triangle { int v0, v1, v2; };
+    __declspec(align(16)) struct Vertex
+    {
+        float x, y, z;
+    };
 
-    typedef tuple<vector<float>, vector<float>, vector<float>> PositionsNormalsUVs;
+    struct Triangle
+    {
+        int v[3];
+    };
+
+    typedef tuple<vector<Vertex>, vector<Vertex>, vector<float>, vector<Triangle>> PositionsNormalsUVsTris;
     vector<string> lines;
+
+    int getInt(const string& s)
+    {
+        int res;
+        if (s == "") return 0;
+        sscanf_s(s.c_str(), "%d", &res);
+        return res;
+    }
+
+
 
     string strip(const string& s)
     {
@@ -77,7 +94,7 @@ namespace embRT
         return ss.str();
     }
 
-    auto split(const string& s, char delim) -> vector<string>
+    vector<string> split(const string& s, char delim)
     {
         vector<string> elems;
         std::stringstream ss(s);
@@ -89,7 +106,22 @@ namespace embRT
         return elems;
     }
 
-    auto splitNewlines(const string& s) -> size_t
+    Triangle constructTriangle(std::string a, std::string b, std::string c)
+    {
+        Triangle result;
+        string items[3] = { a, b, c };
+
+        for (int i = 0; i < 3; i++)
+        {
+            const string& item = items[i];
+
+            vector<string> subItems = split(item, '/');
+            result.v[i] = getInt(subItems[0]);
+        }
+        return result;
+    }
+
+    size_t splitNewlines(const string& s)
     {
         char* ptr = (char*)s.c_str();
         char* start = ptr;
@@ -109,7 +141,7 @@ namespace embRT
         return lines.size();
     }
 
-    auto readFile(const string& fileName) -> vector<string>&
+    vector<string>& readFile(const string& fileName)
     {
         std::cout << "Reading file: " << fileName << std::endl;
 
@@ -134,11 +166,12 @@ namespace embRT
         return lines;
     }
 
-    auto extractVertices(size_t startLine, size_t endLine) -> PositionsNormalsUVs
+    PositionsNormalsUVsTris extractData(size_t startLine, size_t endLine)
     {
-        vector<float> positions;
-        vector<float> normals;
+        vector<Vertex> positions;
+        vector<Vertex> normals;
         vector<float> uvs;
+        vector<Triangle> tris;
 
         for (auto l = startLine; l < endLine; l++)
         {
@@ -159,16 +192,20 @@ namespace embRT
 
             if (components[0] == "v")
             {
-                positions.push_back(stof(components[1]));
-                positions.push_back(stof(components[2]));
-                positions.push_back(stof(components[3]));
+                Vertex v;
+                v.x = stof(components[1]);
+                v.y = stof(components[2]);
+                v.z = stof(components[3]);
+                positions.push_back(v);
             }
 
             if (components[0] == "vn")
             {
-                normals.push_back(stof(components[1]));
-                normals.push_back(stof(components[2]));
-                normals.push_back(stof(components[3]));
+                Vertex n;
+                n.x = stof(components[1]);
+                n.y = stof(components[2]);
+                n.z = stof(components[3]);
+                normals.push_back(n);
             }
 
             if (components[0] == "vt")
@@ -176,9 +213,19 @@ namespace embRT
                 uvs.push_back(stof(components[1]));
                 uvs.push_back(stof(components[2]));
             }
+            if (components[0] == "f")
+            {
+                auto numTriangles = components.size() - 3;
+
+                for (auto i = 0; i < numTriangles; i++)
+                {
+                    auto T = constructTriangle(components[1], components[2 + i], components[3 + i]);
+                    tris.push_back(T);
+                }
+            }
         }
 
-        return PositionsNormalsUVs(positions, normals, uvs);
+        return PositionsNormalsUVsTris(positions, normals, uvs, tris);
     }
 }
 

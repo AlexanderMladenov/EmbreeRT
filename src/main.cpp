@@ -64,48 +64,57 @@ void error_handler(const RTCError code, const char* str)
     exit(-2);
 }
 namespace embRT{
-     std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> FrameBuf;
+    std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> FrameBuf;
 }
 
 using namespace embRT;
 #undef main
 int main(int argc, char* argv[])
 {
+    rtcInit(NULL);
+    rtcSetErrorFunction(error_handler);
+
+    Camera cam(vec3(0, 1, -5), vec3(0, 0, 0), 75);
+
+    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT4);
+
+    /* create a triangulated plane with 2 triangles and 4 vertices */
+
+    auto f = readFile("../meshes/teapot_lowres.obj");
+    auto a = extractData(0, f.size());
+
+    auto& verts = std::get<0>(a);
+    auto& tris = std::get<3>(a);
+    unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, tris.size(), verts.size());
+
+    /*set vertices */
+    Vertex* vertices = (Vertex*)rtcMapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
+    for (int j = 0; j < verts.size(); j++)
+    {
+        vertices[j].x = verts[j].x;
+        vertices[j].y = verts[j].y;
+        vertices[j].z = verts[j].z;
+    }
+    rtcUnmapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
+
+    Triangle* triangles = (Triangle*)rtcMapBuffer(scene, mesh, RTC_INDEX_BUFFER);
+    for (int j = 0; j < verts.size(); j++)
+    {
+        triangles[j].v[0] = tris[j].v[0];
+        triangles[j].v[1] = tris[j].v[1];
+        triangles[j].v[2] = tris[j].v[2];
+    }
+    rtcUnmapBuffer(scene, mesh, RTC_INDEX_BUFFER);
+    rtcCommit(scene);
 
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
-    rtcInit(NULL);
     if (!InitVideo())
     {
         rtcExit();
         SDL_Quit();
         return -1;
     }
-    rtcSetErrorFunction(error_handler);
 
-    Camera cam(vec3(-9, 6, 0), vec3(90, 0, 0), 75);
-
-    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT4);
-
-    /* create a triangulated plane with 2 triangles and 4 vertices */
-    unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, 2, 4);
-
-    /* set vertices */
-    Vertex* vertices = (Vertex*)rtcMapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
-    vertices[0].x = -10; vertices[0].y = -2; vertices[0].z = -10;
-    vertices[1].x = -10; vertices[1].y = -2; vertices[1].z = +10;
-    vertices[2].x = +10; vertices[2].y = -2; vertices[2].z = -10;
-    vertices[3].x = +10; vertices[3].y = -2; vertices[3].z = +10;
-    rtcUnmapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
-
-    /* set triangles */
-    Triangle* triangles = (Triangle*)rtcMapBuffer(scene, mesh, RTC_INDEX_BUFFER);
-    triangles[0].v0 = 0; triangles[0].v1 = 2; triangles[0].v2 = 1;
-    triangles[1].v0 = 1; triangles[1].v1 = 2; triangles[1].v2 = 3;
-    rtcUnmapBuffer(scene, mesh, RTC_INDEX_BUFFER);
-    rtcCommit(scene);
-
-    auto f = readFile("../meshes/teapot_lowres.obj");
-    auto a = extractVertices(0, f.size());
     auto t1 = std::chrono::high_resolution_clock::now();
     RenderToBuffer4(cam, FrameBuf, scene);
     auto t2 = std::chrono::high_resolution_clock::now();
