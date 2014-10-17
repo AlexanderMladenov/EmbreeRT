@@ -27,6 +27,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <thread>
 
 #include <SDL.h>
 #include <embree2/rtcore.h>
@@ -74,8 +75,8 @@ int main(int argc, char* argv[])
     rtcInit(NULL);
     rtcSetErrorFunction(error_handler);
 
-    auto lines = OBJMeshProvider::readFile("../meshes/banshi_1.obj");
-    auto objData = OBJMeshProvider::extractData(0, lines.size());
+    auto lines = readOBJ("../meshes/banshi_1.obj");
+    auto objData = extractData(0, lines.size());
 
     auto& verts = std::get<0>(objData);
     auto& tris = std::get<3>(objData);

@@ -40,191 +40,187 @@ namespace embRT
     };
 
     typedef tuple<vector<Vertex>, vector<Vertex>, vector<float>, vector<Triangle>> PositionsNormalsUVsTris;
+    vector<string> lines;
 
-    class OBJMeshProvider
+    string strip(const string& s)
     {
-    public:
-        static vector<string> lines;
+        size_t spacesFront = 0;
+        size_t spacesBack = 0;
 
-        static string strip(const string& s)
+        for (char c : s)
         {
-            size_t spacesFront = 0;
-            size_t spacesBack = 0;
-
-            for (char c : s)
+            if (c != ' ')
             {
-                if (c != ' ')
-                {
-                    break;
-                }
-
-                spacesFront++;
+                break;
             }
 
-            for (auto it = s.rbegin(); it != s.rend(); it++)
-            {
-                if (*it != ' ')
-                {
-                    break;
-                }
-
-                spacesBack++;
-            }
-
-            std::stringstream ss;
-            for (auto it = s.begin() + spacesFront; it != s.end() - spacesBack; it++)
-            {
-                if (it < s.end() - spacesBack - 1)
-                {
-                    if (*it == ' ' && *(it + 1) == ' ')
-                    {
-                        continue;
-                    }
-                }
-
-                ss << *it;
-            }
-
-            return ss.str();
+            spacesFront++;
         }
 
-        static vector<string> split(const string& s, char delim)
+        for (auto it = s.rbegin(); it != s.rend(); it++)
         {
-            vector<string> elems;
-            std::stringstream ss(s);
-            string item;
-            while (getline(ss, item, delim))
+            if (*it != ' ')
             {
-                elems.push_back(item);
-            }
-            return elems;
-        }
-
-        static Triangle constructTriangle(std::string a, std::string b, std::string c)
-        {
-            Triangle result;
-            string items[3] = { a, b, c };
-
-            for (int i = 0; i < 3; i++)
-            {
-                const string& item = items[i];
-
-                vector<string> subItems = split(item, '/');
-                result.v[i] = stoi(subItems[0]);
-            }
-            return result;
-        }
-
-        static size_t splitNewlines(const string& s)
-        {
-            char* ptr = (char*)s.c_str();
-            char* start = ptr;
-
-            size_t newLinesCount = 0;
-
-            for (auto i = 0u; i < s.size(); i++)
-            {
-                if (ptr[i] == '\n')
-                {
-                    ptr[i] = '\0';
-                    auto length = (ptr + i) - start;
-                    lines.emplace_back(start, length);
-                    start = ptr + i + 1;
-                }
-            }
-            return lines.size();
-        }
-
-        static vector<string>& readFile(const string& fileName)
-        {
-            std::cout << "Reading file: " << fileName << std::endl;
-
-            std::ifstream f(fileName);
-            if (!f.is_open())
-            {
-                throw std::runtime_error("error opening file");
+                break;
             }
 
-            string s;
-
-            f.seekg(0, std::ios::end);
-            auto length = f.tellg();
-            s.reserve(length);
-            f.seekg(0, std::ios::beg);
-
-            s.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
-
-            auto linesCount = splitNewlines(s);
-
-            std::cout << "Done! " << linesCount << " lines read" << std::endl;
-            return lines;
+            spacesBack++;
         }
 
-        static PositionsNormalsUVsTris extractData(size_t startLine, size_t endLine)
+        std::stringstream ss;
+        for (auto it = s.begin() + spacesFront; it != s.end() - spacesBack; it++)
         {
-            std::cout << "Extracting data.." << std::endl;
-            vector<Vertex> positions;
-            vector<Vertex> normals;
-            vector<float> uvs;
-            vector<Triangle> tris;
-            tris.push_back(Triangle());
-            positions.push_back(Vertex());
-
-            for (auto l = startLine; l < endLine; l++)
+            if (it < s.end() - spacesBack - 1)
             {
-                auto line = lines[l];
-                auto stripped = strip(line);
-
-                if (line.size() < 6)
+                if (*it == ' ' && *(it + 1) == ' ')
                 {
                     continue;
                 }
+            }
 
-                auto components = split(stripped, ' ');
+            ss << *it;
+        }
 
-                if (stripped[0] == '#')
+        return ss.str();
+    }
+
+    vector<string> split(const string& s, char delim)
+    {
+        vector<string> elems;
+        std::stringstream ss(s);
+        string item;
+        while (getline(ss, item, delim))
+        {
+            elems.push_back(item);
+        }
+        return elems;
+    }
+
+    Triangle constructTriangle(std::string a, std::string b, std::string c)
+    {
+        Triangle result;
+        string items[3] = { a, b, c };
+
+        for (int i = 0; i < 3; i++)
+        {
+            const string& item = items[i];
+
+            vector<string> subItems = split(item, '/');
+            result.v[i] = stoi(subItems[0]);
+        }
+        return result;
+    }
+
+    size_t splitNewlines(const string& s)
+    {
+        char* ptr = (char*)s.c_str();
+        char* start = ptr;
+
+        size_t newLinesCount = 0;
+
+        for (auto i = 0u; i < s.size(); i++)
+        {
+            if (ptr[i] == '\n')
+            {
+                ptr[i] = '\0';
+                auto length = (ptr + i) - start;
+                lines.emplace_back(start, length);
+                start = ptr + i + 1;
+            }
+        }
+        return lines.size();
+    }
+
+    vector<string>& readOBJ(const string& fileName)
+    {
+        std::cout << "Reading file: " << fileName << std::endl;
+
+        std::ifstream f(fileName);
+        if (!f.is_open())
+        {
+            throw std::runtime_error("error opening file");
+        }
+
+        string s;
+
+        f.seekg(0, std::ios::end);
+        auto length = f.tellg();
+        s.reserve(length);
+        f.seekg(0, std::ios::beg);
+
+        s.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
+
+        auto linesCount = splitNewlines(s);
+
+        std::cout << "Done! " << linesCount << " lines read" << std::endl;
+        return lines;
+    }
+
+    PositionsNormalsUVsTris extractData(size_t startLine, size_t endLine)
+    {
+        std::cout << "Extracting data.." << std::endl;
+        vector<Vertex> positions;
+        vector<Vertex> normals;
+        vector<float> uvs;
+        vector<Triangle> tris;
+        tris.push_back(Triangle());
+        positions.push_back(Vertex());
+
+        for (auto l = startLine; l < endLine; l++)
+        {
+            auto line = lines[l];
+            auto stripped = strip(line);
+
+            if (line.size() < 6)
+            {
+                continue;
+            }
+
+            auto components = split(stripped, ' ');
+
+            if (stripped[0] == '#')
+            {
+                continue;
+            }
+
+            if (components[0] == "v")
+            {
+                Vertex v;
+                v.x = stof(components[1]);
+                v.y = stof(components[2]);
+                v.z = stof(components[3]);
+                positions.push_back(v);
+            }
+
+            if (components[0] == "vn")
+            {
+                Vertex n;
+                n.x = stof(components[1]);
+                n.y = stof(components[2]);
+                n.z = stof(components[3]);
+                normals.push_back(n);
+            }
+
+            if (components[0] == "vt")
+            {
+                uvs.push_back(stof(components[1]));
+                uvs.push_back(stof(components[2]));
+            }
+            if (components[0] == "f")
+            {
+                int numTriangles = components.size() - 3;
+
+                for (int i = 0; i < numTriangles; i++)
                 {
-                    continue;
-                }
-
-                if (components[0] == "v")
-                {
-                    Vertex v;
-                    v.x = stof(components[1]);
-                    v.y = stof(components[2]);
-                    v.z = stof(components[3]);
-                    positions.push_back(v);
-                }
-
-                if (components[0] == "vn")
-                {
-                    Vertex n;
-                    n.x = stof(components[1]);
-                    n.y = stof(components[2]);
-                    n.z = stof(components[3]);
-                    normals.push_back(n);
-                }
-
-                if (components[0] == "vt")
-                {
-                    uvs.push_back(stof(components[1]));
-                    uvs.push_back(stof(components[2]));
-                }
-                if (components[0] == "f")
-                {
-                    int numTriangles = components.size() - 3;
-
-                    for (int i = 0; i < numTriangles; i++)
-                    {
-                        auto T = constructTriangle(components[1], components[2 + i], components[3 + i]);
-                        tris.push_back(T);
-                    }
+                    auto T = constructTriangle(components[1], components[2 + i], components[3 + i]);
+                    tris.push_back(T);
                 }
             }
-            std::cout << "Done!" << std::endl;
-            return PositionsNormalsUVsTris(positions, normals, uvs, tris);
         }
-    };
+        std::cout << "Done!" << std::endl;
+        return PositionsNormalsUVsTris(positions, normals, uvs, tris);
+    }
+
 }
 
 #endif
