@@ -124,6 +124,18 @@ namespace embRT
         return result;
     }
 
+    std::array<vec3, 4> PathTrace(RTCRay4& rays, const RTCScene& scene, int depth)
+    {
+        std::array<vec3, 4> result;
+        __m128i traceMask = _mm_set1_epi32(0xFFFFFFFF);
+        if (depth == MAX_TRACE_DEPTH)
+        {
+            return result;
+        }
+        rtcIntersect4(&traceMask, scene, rays);
+
+    }
+
     void RenderToBuffer4(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf, const RTCScene& scene)
     {
         for (auto x = 0; x < FRAME_WIDTH; x++)
