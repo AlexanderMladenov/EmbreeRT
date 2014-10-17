@@ -74,22 +74,19 @@ int main(int argc, char* argv[])
     rtcInit(NULL);
     rtcSetErrorFunction(error_handler);
 
-    Camera cam(vec3(-250, 90, 0), vec3(0, 90, 0), 100);
+    auto lines = OBJMeshProvider::readFile("../meshes/banshi_1.obj");
+    auto objData = OBJMeshProvider::extractData(0, lines.size());
 
+    auto& verts = std::get<0>(objData);
+    auto& tris = std::get<3>(objData);
+    auto trisCount = tris.size();
+    auto vertsCount = verts.size();
     RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT4);
-
-    /* create a triangulated plane with 2 triangles and 4 vertices */
-
-    auto f = readFile("../meshes/banshi_1.obj");
-    auto a = extractData(0, f.size());
-
-    auto& verts = std::get<0>(a);
-    auto& tris = std::get<3>(a);
-    unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, tris.size(), verts.size());
+    unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, trisCount, vertsCount);
 
     /*set vertices */
     Vertex* vertices = (Vertex*)rtcMapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
-    for (int j = 0; j < verts.size(); j++)
+    for (auto j = 0; j < vertsCount; j++)
     {
         vertices[j].x = verts[j].x;
         vertices[j].y = verts[j].y;
@@ -98,7 +95,7 @@ int main(int argc, char* argv[])
     rtcUnmapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
 
     Triangle* triangles = (Triangle*)rtcMapBuffer(scene, mesh, RTC_INDEX_BUFFER);
-    for (int j = 0; j < tris.size(); j++)
+    for (auto j = 0; j < trisCount; j++)
     {
         triangles[j].v[0] = tris[j].v[0];
         triangles[j].v[1] = tris[j].v[1];
@@ -115,6 +112,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
+    Camera cam(vec3(-250, 90, 0), vec3(0, 90, 0), 100);
     auto t1 = std::chrono::high_resolution_clock::now();
     RenderToBuffer4(cam, FrameBuf, scene);
     auto t2 = std::chrono::high_resolution_clock::now();

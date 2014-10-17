@@ -43,6 +43,7 @@ namespace embRT
     {
         return std::chrono::duration_cast<T>(end - start).count();
     }
+
 } // namespace embRT
 
 #endif
