@@ -117,7 +117,8 @@ namespace embRT
         {
             if (rays.geomID[i] != RTC_INVALID_GEOMETRY_ID)
             {
-                result[i] = vec3(1, 0.3, 0);
+                
+                result[i] = (vec3(1.0) + vec3(rays.Ngx[i], rays.Ngy[i], rays.Ngz[i])) * vec3(0.5);
             }
         }
         return result;

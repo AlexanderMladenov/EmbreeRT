@@ -26,9 +26,9 @@ namespace embRT
 {
     inline mat4 CreateRotationMatrix(const vec3& rot)
     {
-        return rotate(radians(rot.x), vec3(1, 0, 0)) *
+        return rotate(radians(rot.z), vec3(0, 0, 1)) *
                rotate(radians(rot.y), vec3(0, 1, 0)) *
-               rotate(radians(rot.z), vec3(0, 0, 1));
+               rotate(radians(rot.x), vec3(1, 0, 0));
     }
 
     template <typename T = float>

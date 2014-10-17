@@ -74,13 +74,13 @@ int main(int argc, char* argv[])
     rtcInit(NULL);
     rtcSetErrorFunction(error_handler);
 
-    Camera cam(vec3(0, 1, -5), vec3(0, 0, 0), 75);
+    Camera cam(vec3(-250, 90, 0), vec3(0, 90, 0), 100);
 
     RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT4);
 
     /* create a triangulated plane with 2 triangles and 4 vertices */
 
-    auto f = readFile("../meshes/teapot_lowres.obj");
+    auto f = readFile("../meshes/banshi_1.obj");
     auto a = extractData(0, f.size());
 
     auto& verts = std::get<0>(a);
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
     rtcUnmapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
 
     Triangle* triangles = (Triangle*)rtcMapBuffer(scene, mesh, RTC_INDEX_BUFFER);
-    for (int j = 0; j < verts.size(); j++)
+    for (int j = 0; j < tris.size(); j++)
     {
         triangles[j].v[0] = tris[j].v[0];
         triangles[j].v[1] = tris[j].v[1];

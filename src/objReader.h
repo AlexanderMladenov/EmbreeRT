@@ -42,16 +42,6 @@ namespace embRT
     typedef tuple<vector<Vertex>, vector<Vertex>, vector<float>, vector<Triangle>> PositionsNormalsUVsTris;
     vector<string> lines;
 
-    int getInt(const string& s)
-    {
-        int res;
-        if (s == "") return 0;
-        sscanf_s(s.c_str(), "%d", &res);
-        return res;
-    }
-
-
-
     string strip(const string& s)
     {
         size_t spacesFront = 0;
@@ -116,7 +106,7 @@ namespace embRT
             const string& item = items[i];
 
             vector<string> subItems = split(item, '/');
-            result.v[i] = getInt(subItems[0]);
+            result.v[i] = stoi(subItems[0]);
         }
         return result;
     }
@@ -168,10 +158,13 @@ namespace embRT
 
     PositionsNormalsUVsTris extractData(size_t startLine, size_t endLine)
     {
+        std::cout << "Extracting data.." << std::endl;
         vector<Vertex> positions;
         vector<Vertex> normals;
         vector<float> uvs;
         vector<Triangle> tris;
+        tris.push_back(Triangle());
+        positions.push_back(Vertex());
 
         for (auto l = startLine; l < endLine; l++)
         {
@@ -215,16 +208,16 @@ namespace embRT
             }
             if (components[0] == "f")
             {
-                auto numTriangles = components.size() - 3;
+                int numTriangles = components.size() - 3;
 
-                for (auto i = 0; i < numTriangles; i++)
+                for (int i = 0; i < numTriangles; i++)
                 {
                     auto T = constructTriangle(components[1], components[2 + i], components[3 + i]);
                     tris.push_back(T);
                 }
             }
         }
-
+        std::cout << "Done!" << std::endl;
         return PositionsNormalsUVsTris(positions, normals, uvs, tris);
     }
 }
