@@ -15,7 +15,8 @@ x64/Debug
 build/
 [Bb]in/
 [Oo]bj/
-meshes/
+meshes/trinity_meshes/
+meshes/uno_mesh/
 
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
 !packages/*/build/

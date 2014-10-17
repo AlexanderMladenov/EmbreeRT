@@ -147,6 +147,7 @@
     <ClCompile Include="..\src\renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\BRDF.h" />
     <ClInclude Include="..\src\camera.h" />
     <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\objReader.h" />
