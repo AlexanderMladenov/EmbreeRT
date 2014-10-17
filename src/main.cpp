@@ -64,7 +64,8 @@ void error_handler(const RTCError code, const char* str)
     }
     exit(-2);
 }
-namespace embRT{
+namespace embRT
+{
     std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> FrameBuf;
 }
 
@@ -75,33 +76,22 @@ int main(int argc, char* argv[])
     rtcInit(NULL);
     rtcSetErrorFunction(error_handler);
 
-    auto lines = readOBJ("../meshes/banshi_1.obj");
-    auto objData = extractData(0, lines.size());
+    auto objData = readOBJ("../meshes/sphere.obj");
 
     auto& verts = std::get<0>(objData);
     auto& tris = std::get<3>(objData);
+
     auto trisCount = tris.size();
     auto vertsCount = verts.size();
-    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT4);
+    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT , RTC_INTERSECT4);
     unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, trisCount, vertsCount);
 
-    /*set vertices */
     Vertex* vertices = (Vertex*)rtcMapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
-    for (auto j = 0; j < vertsCount; j++)
-    {
-        vertices[j].x = verts[j].x;
-        vertices[j].y = verts[j].y;
-        vertices[j].z = verts[j].z;
-    }
+    memcpy(vertices, verts.data(), vertsCount * sizeof(Vertex));
     rtcUnmapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
 
     Triangle* triangles = (Triangle*)rtcMapBuffer(scene, mesh, RTC_INDEX_BUFFER);
-    for (auto j = 0; j < trisCount; j++)
-    {
-        triangles[j].v[0] = tris[j].v[0];
-        triangles[j].v[1] = tris[j].v[1];
-        triangles[j].v[2] = tris[j].v[2];
-    }
+    memcpy(triangles, tris.data(), trisCount * sizeof(Triangle));
     rtcUnmapBuffer(scene, mesh, RTC_INDEX_BUFFER);
     rtcCommit(scene);
 
@@ -113,7 +103,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    Camera cam(vec3(-250, 90, 0), vec3(0, 90, 0), 100);
+    Camera cam(vec3(0, 0, -300), vec3(0, 0, 0), 100);
     auto t1 = std::chrono::high_resolution_clock::now();
     RenderToBuffer4(cam, FrameBuf, scene);
     auto t2 = std::chrono::high_resolution_clock::now();

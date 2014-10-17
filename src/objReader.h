@@ -131,34 +131,9 @@ namespace embRT
         return lines.size();
     }
 
-    vector<string>& readOBJ(const string& fileName)
-    {
-        std::cout << "Reading file: " << fileName << std::endl;
-
-        std::ifstream f(fileName);
-        if (!f.is_open())
-        {
-            throw std::runtime_error("error opening file");
-        }
-
-        string s;
-
-        f.seekg(0, std::ios::end);
-        auto length = f.tellg();
-        s.reserve(length);
-        f.seekg(0, std::ios::beg);
-
-        s.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
-
-        auto linesCount = splitNewlines(s);
-
-        std::cout << "Done! " << linesCount << " lines read" << std::endl;
-        return lines;
-    }
-
     PositionsNormalsUVsTris extractData(size_t startLine, size_t endLine)
     {
-        std::cout << "Extracting data.." << std::endl;
+        std::cout << "Extracting data from OBJ.." << std::endl;
         vector<Vertex> positions;
         vector<Vertex> normals;
         vector<float> uvs;
@@ -206,6 +181,7 @@ namespace embRT
                 uvs.push_back(stof(components[1]));
                 uvs.push_back(stof(components[2]));
             }
+
             if (components[0] == "f")
             {
                 int numTriangles = components.size() - 3;
@@ -217,10 +193,37 @@ namespace embRT
                 }
             }
         }
-        std::cout << "Done!" << std::endl;
+        std::cout << "Done! " << "Extracted " << positions.size() << " vertices\n"<<
+            tris.size() << " triangles" << std::endl;
+
         return PositionsNormalsUVsTris(positions, normals, uvs, tris);
     }
 
+    PositionsNormalsUVsTris readOBJ(const string& fileName)
+    {
+        std::cout << "Reading file: " << fileName << std::endl;
+
+        std::ifstream f(fileName);
+        if (!f.is_open())
+        {
+            throw std::runtime_error("error opening file");
+        }
+
+        string s;
+
+        f.seekg(0, std::ios::end);
+        auto length = f.tellg();
+        s.reserve(length);
+        f.seekg(0, std::ios::beg);
+
+        s.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
+
+        auto linesCount = splitNewlines(s);
+
+        std::cout << "Done! " << linesCount << " lines read" << std::endl;
+
+        return extractData(0, lines.size());
+    }
 }
 
 #endif
