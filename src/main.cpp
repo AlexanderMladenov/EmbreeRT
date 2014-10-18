@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     rtcInit(NULL);
     rtcSetErrorFunction(error_handler);
 
-    auto objData = readOBJ("../meshes/sponza.obj");
+    auto objData = readOBJ("../resources/sponza.obj");
 
     auto& verts = std::get<0>(objData);
     auto& tris = std::get<3>(objData);
