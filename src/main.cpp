@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    Camera cam(vec3(150, 120, 0), vec3(0, 90, 0), 100);
+    Camera cam(vec3(-100, 120, 0), vec3(0, 270, 0), 100);
     auto t1 = std::chrono::high_resolution_clock::now();
     RenderToBuffer4(cam, FrameBuf, scene);
     auto t2 = std::chrono::high_resolution_clock::now();
