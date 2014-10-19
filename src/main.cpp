@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     rtcInit(NULL);
     rtcSetErrorFunction(error_handler);
 
-    auto objData = readOBJ("../resources/teapot_lowres.obj");
+    auto objData = readOBJ("../resources/sponza.obj");
 
     auto& verts = std::get<0>(objData);
     auto& tris = std::get<3>(objData);
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    Camera cam(vec3(-0, 1, -5), vec3(0, 0, 0), 100);
+    Camera cam(vec3(-20, 75, -5), vec3(0, 270, 0), 100);
     auto t1 = std::chrono::high_resolution_clock::now();
     RenderToBuffer4(cam, FrameBuf, scene);
     auto t2 = std::chrono::high_resolution_clock::now();
