@@ -4,7 +4,7 @@ EmbreeRT
 Screens
 ========
 
-![StarCraft 2 Banshee](http://imgur.com/a/e4l1e)
+[StarCraft 2 Banshee](http://imgur.com/a/e4l1e)
 
 ![Crytek Sponza with geometric normals shading](http://i.imgur.com/Y36jTlt.png)
 Building
