@@ -109,12 +109,23 @@ namespace embRT
         memcpy(result.orgz, &positionsZ, sizeof(positionsZ));
 
         vec3 targets[4];
-        for (auto i = 0; i < 4; i++)
-        {
-            targets[i] = normalize((m_TopLeft +
-                (m_TopRight - m_TopLeft) * ((x) / (float)FRAME_WIDTH) + 
-                (m_DownLeft - m_TopLeft) * ((y + i) / (float)FRAME_HEIGHT)) - m_Position);
-        }
+       
+            targets[0] = normalize((m_TopLeft +
+                (m_TopRight - m_TopLeft) * ((x + 1) / (float)FRAME_WIDTH) + 
+                (m_DownLeft - m_TopLeft) * ((y + 1) / (float)FRAME_HEIGHT)) - m_Position);
+        
+            targets[1] = normalize((m_TopLeft +
+                (m_TopRight - m_TopLeft) * ((x) / (float) FRAME_WIDTH) +
+                (m_DownLeft - m_TopLeft) * ((y + 1) / (float) FRAME_HEIGHT)) - m_Position);
+
+            targets[2] = normalize((m_TopLeft +
+                (m_TopRight - m_TopLeft) * ((x + 1) / (float) FRAME_WIDTH) +
+                (m_DownLeft - m_TopLeft) * ((y) / (float) FRAME_HEIGHT)) - m_Position);
+
+            targets[3] = normalize((m_TopLeft +
+                (m_TopRight - m_TopLeft) * ((x) / (float) FRAME_WIDTH) +
+                (m_DownLeft - m_TopLeft) * ((y) / (float) FRAME_HEIGHT)) - m_Position);
+
         // assign directions
         __m128 directionsX = _mm_set_ps(targets[0].x, targets[1].x, targets[2].x, targets[3].x);
         __m128 directionsY = _mm_set_ps(targets[0].y, targets[1].y, targets[2].y, targets[3].y);

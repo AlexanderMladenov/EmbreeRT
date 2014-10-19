@@ -34,9 +34,9 @@ namespace embRT
     std::uint32_t ConvertPixel(const vec3& pixel)
     {
         std::uint8_t r, g, b;
-        r = (Uint8)(clamp(pixel.r, 0.f, 1.f) * 255);
-        g = (Uint8)(clamp(pixel.g, 0.f, 1.f) * 255);
-        b = (Uint8)(clamp(pixel.b, 0.f, 1.f) * 255);
+        r = (Uint8) (clamp(pixel.r, 0.f, 1.f) * 255);
+        g = (Uint8) (clamp(pixel.g, 0.f, 1.f) * 255);
+        b = (Uint8) (clamp(pixel.b, 0.f, 1.f) * 255);
 
         return (b << blueShift) | (g << greenShift) | (r << redShift);
     }
@@ -47,7 +47,7 @@ namespace embRT
     {
         for (int y = 0; y < FRAME_HEIGHT; y++)
         {
-            Uint32 *row = (Uint32*)((Uint8*)m_Surface->pixels + y * m_Surface->pitch);
+            Uint32 *row = (Uint32*) ((Uint8*) m_Surface->pixels + y * m_Surface->pitch);
             for (int x = 0; x < FRAME_WIDTH; x++)
                 row[x] = ConvertPixel(buf[x][y]);
         }
@@ -80,7 +80,7 @@ namespace embRT
         }
 
         m_Window = SDL_CreateWindow("embrt", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            FRAME_WIDTH, FRAME_HEIGHT, SDL_WINDOW_OPENGL);
+                                    FRAME_WIDTH, FRAME_HEIGHT, SDL_WINDOW_OPENGL);
 
         if (!m_Window)
         {
@@ -117,8 +117,7 @@ namespace embRT
         {
             if (rays.geomID[i] != RTC_INVALID_GEOMETRY_ID)
             {
-                
-                result[i] = (vec3(1.0) + vec3(rays.Ngx[i], rays.Ngy[i], rays.Ngz[i])) * vec3(0.5);
+                result[3 - i] = (vec3(1.0) + vec3(rays.Ngx[i], rays.Ngy[i], rays.Ngz[i])) * vec3(0.5);
             }
         }
         return result;
@@ -139,14 +138,17 @@ namespace embRT
 
     void RenderToBuffer4(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf, const RTCScene& scene)
     {
-        for (auto x = 0; x < FRAME_WIDTH; x++)
+        for (auto x = 0; x < FRAME_WIDTH; x += 2)
         {
-            for (auto y = 0; y < FRAME_HEIGHT; y+=4)
+            for (auto y = 0; y < FRAME_HEIGHT; y += 2)
             {
                 auto rayP = cam.GetRayPacket4(x, y);
                 auto colors = Raytrace4(rayP, scene);
-                for (auto i = 0; i < 4; i++)
-                    buf[x][y + i] = colors[3 - i];
+                buf[x][y] = colors[3];
+                buf[x + 1][y] = colors[2];
+                buf[x][y + 1] = colors[1];
+                buf[x + 1][y + 1] = colors[0];
+
             }
         }
         SwapBuffers(buf);
