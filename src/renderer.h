@@ -133,6 +133,7 @@ namespace embRT
             return result;
         }
         rtcIntersect4(&traceMask, scene, rays);
+        return result;
 
     }
 
