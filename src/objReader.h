@@ -38,8 +38,14 @@ namespace embRT
     {
         int v[3];
     };
+    struct FullTriangleData
+    {
+        int v[3];
+        int n[3];
+        int t[3];
+    };
 
-    typedef tuple<vector<Vertex>, vector<vec3>, vector<float>, vector<Triangle>> PositionsNormalsUVsTris;
+    typedef tuple<vector<Vertex>, vector<vec3>, vector<float>, vector<FullTriangleData>> PositionsNormalsUVsTris;
     vector<string> lines;
 
     string strip(const string& s)
@@ -96,9 +102,9 @@ namespace embRT
         return elems;
     }
 
-    Triangle constructTriangle(std::string a, std::string b, std::string c)
+    FullTriangleData constructTriangle(std::string a, std::string b, std::string c)
     {
-        Triangle result;
+        FullTriangleData result;
         string items[3] = { a, b, c };
 
         for (int i = 0; i < 3; i++)
@@ -107,6 +113,11 @@ namespace embRT
 
             vector<string> subItems = split(item, '/');
             result.v[i] = stoi(subItems[0]);
+            if (subItems.size() > 2)
+            {
+                result.n[i] = stoi(subItems[2]);
+            }
+            else result.n[i] = 0;
         }
         return result;
     }
@@ -137,9 +148,11 @@ namespace embRT
         vector<Vertex> positions;
         vector<vec3> normals;
         vector<float> uvs;
-        vector<Triangle> tris;
-        tris.push_back(Triangle());
+        vector<FullTriangleData> tris;
+        tris.push_back(FullTriangleData());
         positions.push_back(Vertex());
+        normals.push_back(vec3());
+        uvs.push_back(-1.f);
 
         for (auto l = startLine; l < endLine; l++)
         {

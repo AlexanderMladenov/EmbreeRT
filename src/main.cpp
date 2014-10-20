@@ -46,8 +46,8 @@
 #include "util.h"
 #include "camera.h"
 #include "objReader.h"
-#include "renderer.h"
 #include "mesh.h"
+#include "renderer.h"
 
 /* error reporting function */
 void error_handler(const RTCError code, const char* str)
@@ -76,13 +76,15 @@ int main(int argc, char* argv[])
     rtcInit(NULL);
     rtcSetErrorFunction(error_handler);
 
-    auto objData = readOBJ("../resources/teapot_lowres.obj");
+    Mesh m;
+    m.m_Data = readOBJ("../resources/teapot_lowres.obj");
 
-    auto& verts = std::get<0>(objData);
-    auto& tris = std::get<3>(objData);
+    auto& verts = std::get<0>(m.m_Data);
+    auto& tris = std::get<3>(m.m_Data);
 
     auto trisCount = tris.size();
     auto vertsCount = verts.size();
+    auto indBuf = m.extractIndexBuffer();
     RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT , RTC_INTERSECT4);
     unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, trisCount, vertsCount);
 
@@ -91,7 +93,7 @@ int main(int argc, char* argv[])
     rtcUnmapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
 
     Triangle* triangles = (Triangle*)rtcMapBuffer(scene, mesh, RTC_INDEX_BUFFER);
-    memcpy(triangles, tris.data(), trisCount * sizeof(Triangle));
+    memcpy(triangles, indBuf.data(), trisCount * sizeof(Triangle));
     rtcUnmapBuffer(scene, mesh, RTC_INDEX_BUFFER);
     rtcCommit(scene);
 
@@ -105,7 +107,7 @@ int main(int argc, char* argv[])
 
     Camera cam(vec3(-0, 1, -5), vec3(0, 0, 0), 100);
     auto t1 = std::chrono::high_resolution_clock::now();
-    RenderToBuffer4(cam, FrameBuf, scene, objData);
+    RenderToBuffer4(cam, FrameBuf, scene, m);
     auto t2 = std::chrono::high_resolution_clock::now();
     auto time = timePast(t1, t2);
     auto time2 = timePast<std::chrono::milliseconds>(t1, t2);
