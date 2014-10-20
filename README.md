@@ -4,9 +4,8 @@ EmbreeRT
 Screens
 ========
 
-[StarCraft 2 Banshee](http://imgur.com/a/e4l1e)
-
-![Crytek Sponza with geometric normals shading](http://i.imgur.com/Y36jTlt.png)
+![Dalek(EXTERMINATE!)](http://imgur.com/tvPsLmX)
+![Crytek Sponza with interpolated vertex normals shading](http://i.imgur.com/9q111vt.png)
 Crytek Sponza with geometric normals shading
 Building
 ========
