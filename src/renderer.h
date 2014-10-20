@@ -107,17 +107,31 @@ namespace embRT
         return true;
     }
 
-    std::array<vec3, 4> Raytrace4(RTCRay4& rays, const RTCScene& scene)
+    std::array<vec3, 4> Raytrace4(RTCRay4& rays, const RTCScene& scene, const PositionsNormalsUVsTris& data)
     {
         std::array<vec3, 4> result;
         __m128i traceMask = _mm_set1_epi32(0xFFFFFFFF);
+        auto& normals = std::get<1>(data);
+        auto& triangles = std::get<3>(data);
 
         rtcIntersect4(&traceMask, scene, rays);
         for (auto i = 0; i < 4; i++)
         {
             if (rays.geomID[i] != RTC_INVALID_GEOMETRY_ID)
             {
-                result[3 - i] = (vec3(1.0) + vec3(rays.Ngx[i], rays.Ngy[i], rays.Ngz[i])) * vec3(0.5);
+                auto& tri = triangles[rays.primID[i]];
+                if (normals.size() > 0) 
+                {
+                    auto n0 = normals[tri.v[0]];
+                    auto n1 = normals[tri.v[1]];
+                    auto n2 = normals[tri.v[2]];
+                    float u = rays.u[i], v = rays.v[i], w = 1.0f - rays.u[i] - rays.v[i];
+                    vec3 Ns = w * n0 + u * n1 + v * n2;
+                    normalize(Ns);
+                    result[3 - i] = (vec3(1.0) + Ns) * vec3(0.5);
+                }
+                else 
+                    result[3 - i] = (vec3(1.0) + vec3(rays.Ngx[i], rays.Ngy[i], rays.Ngz[i])) * vec3(0.5);
             }
         }
         return result;
@@ -136,14 +150,14 @@ namespace embRT
 
     }
 
-    void RenderToBuffer4(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf, const RTCScene& scene)
+    void RenderToBuffer4(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf, const RTCScene& scene, const PositionsNormalsUVsTris& data)
     {
         for (auto x = 0; x < FRAME_WIDTH; x += 2)
         {
             for (auto y = 0; y < FRAME_HEIGHT; y += 2)
             {
                 auto rayP = cam.GetRayPacket4(x, y);
-                auto colors = Raytrace4(rayP, scene);
+                auto colors = Raytrace4(rayP, scene, data);
                 buf[x][y] = colors[3];
                 buf[x + 1][y] = colors[2];
                 buf[x][y + 1] = colors[1];

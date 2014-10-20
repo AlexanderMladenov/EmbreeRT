@@ -39,7 +39,7 @@ namespace embRT
         int v[3];
     };
 
-    typedef tuple<vector<Vertex>, vector<Vertex>, vector<float>, vector<Triangle>> PositionsNormalsUVsTris;
+    typedef tuple<vector<Vertex>, vector<vec3>, vector<float>, vector<Triangle>> PositionsNormalsUVsTris;
     vector<string> lines;
 
     string strip(const string& s)
@@ -135,7 +135,7 @@ namespace embRT
     {
         std::cout << "Extracting data from OBJ.." << std::endl;
         vector<Vertex> positions;
-        vector<Vertex> normals;
+        vector<vec3> normals;
         vector<float> uvs;
         vector<Triangle> tris;
         tris.push_back(Triangle());
@@ -169,7 +169,7 @@ namespace embRT
 
             if (components[0] == "vn")
             {
-                Vertex n;
+                vec3 n;
                 n.x = stof(components[1]);
                 n.y = stof(components[2]);
                 n.z = stof(components[3]);

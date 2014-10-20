@@ -151,6 +151,7 @@
     <ClInclude Include="..\src\BRDF.h" />
     <ClInclude Include="..\src\camera.h" />
     <ClInclude Include="..\src\constants.h" />
+    <ClInclude Include="..\src\mesh.h" />
     <ClInclude Include="..\src\objReader.h" />
     <ClInclude Include="..\src\renderer.h" />
     <ClInclude Include="..\src\SIMD_SSE.h" />

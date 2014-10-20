@@ -47,5 +47,8 @@
     <ClInclude Include="..\src\BRDF.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

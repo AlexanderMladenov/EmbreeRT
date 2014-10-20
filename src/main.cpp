@@ -47,7 +47,7 @@
 #include "camera.h"
 #include "objReader.h"
 #include "renderer.h"
-
+#include "mesh.h"
 
 /* error reporting function */
 void error_handler(const RTCError code, const char* str)
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     rtcInit(NULL);
     rtcSetErrorFunction(error_handler);
 
-    auto objData = readOBJ("../resources/sponza.obj");
+    auto objData = readOBJ("../resources/teapot_lowres.obj");
 
     auto& verts = std::get<0>(objData);
     auto& tris = std::get<3>(objData);
@@ -103,9 +103,9 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    Camera cam(vec3(-20, 75, -5), vec3(0, 270, 0), 100);
+    Camera cam(vec3(-0, 1, -5), vec3(0, 0, 0), 100);
     auto t1 = std::chrono::high_resolution_clock::now();
-    RenderToBuffer4(cam, FrameBuf, scene);
+    RenderToBuffer4(cam, FrameBuf, scene, objData);
     auto t2 = std::chrono::high_resolution_clock::now();
     auto time = timePast(t1, t2);
     auto time2 = timePast<std::chrono::milliseconds>(t1, t2);
