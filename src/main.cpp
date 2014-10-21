@@ -28,6 +28,7 @@
 #include <sstream>
 #include <fstream>
 #include <thread>
+#include <random>
 
 #include <SDL.h>
 #include <embree2/rtcore.h>
@@ -43,9 +44,16 @@
 #include "constants.h"
 #include "SIMD_SSE.h"
 
+namespace embRT
+{
+    std::mt19937 RandomGen(NULL);
+    std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> FrameBuf;
+}
+
 #include "util.h"
 #include "camera.h"
 #include "objReader.h"
+#include "BRDF.h"
 #include "mesh.h"
 #include "renderer.h"
 
@@ -64,10 +72,7 @@ void error_handler(const RTCError code, const char* str)
     }
     exit(-2);
 }
-namespace embRT
-{
-    std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> FrameBuf;
-}
+
 
 using namespace embRT;
 #undef main
@@ -79,12 +84,12 @@ int main(int argc, char* argv[])
     Mesh m;
     m.m_Data = readOBJ("../resources/sponza.obj");
 
-    auto& verts = std::get<0>(m.m_Data);
-    auto& tris = std::get<3>(m.m_Data);
+    auto& verts = m.generateVertexBufferAligned();
 
-    auto trisCount = tris.size();
+    auto trisCount = std::get<3>(m.m_Data).size();
     auto vertsCount = verts.size();
-    auto indBuf = m.extractIndexBuffer();
+    auto indBuf = m.generateIndexBufferAligned();
+
     RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT , RTC_INTERSECT4);
     unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, trisCount, vertsCount);
 
@@ -106,12 +111,18 @@ int main(int argc, char* argv[])
     }
 
     Camera cam(vec3(200, 75, -5), vec3(0, 270, 0), 100);
+
     auto t1 = std::chrono::high_resolution_clock::now();
     RenderToBuffer4(cam, FrameBuf, scene, m);
     auto t2 = std::chrono::high_resolution_clock::now();
     auto time = timePast(t1, t2);
     auto time2 = timePast<std::chrono::milliseconds>(t1, t2);
-    std::cout << "Rendering took " << time << " sec " << time2 << " milsec" << std::endl;
+    auto ms = time2 - (time * 1000);
+
+    std::stringstream ss;
+    ss << "embRT: " << time << " s " << ms << " ms" << std::endl;
+    SDL_SetWindowTitle(m_Window, ss.str().c_str());
+    std::cout << "Rendering took " << time << " s " << ms << " ms" << std::endl;
 
     WaitForUserExit();
     rtcExit();

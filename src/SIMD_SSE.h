@@ -151,12 +151,12 @@ namespace embRT
             return result;
         }
 
-        inline Vec3Packet operator-(const Vec3Packet& a, const Vec3Packet& b)
+        inline Vec3Packet operator-(const Vec3Packet& a)
         {
             Vec3Packet result;
-            result.x = _mm_sub_ps(a.x, b.x);
-            result.y = _mm_sub_ps(a.y, b.y);
-            result.z = _mm_sub_ps(a.z, b.z);
+            result.x = _mm_mul_ps(a.x, SIMDConstants::minusOne);
+            result.y = _mm_mul_ps(a.y, SIMDConstants::minusOne);
+            result.z = _mm_mul_ps(a.z, SIMDConstants::minusOne);
             return result;
         }
 

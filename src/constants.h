@@ -27,9 +27,9 @@ namespace embRT
 
 #define FRAME_WIDTH 1280
 #define FRAME_HEIGHT 720
-#define PI 3.14159265359
-#define PI2 6.28318530718
-#define PIHALF 1.57079632679
+#define PI 3.14159265359f
+#define PI2 6.28318530718f
+#define PIHALF 1.57079632679f
 #define MAX_TRACE_DEPTH 5
 
 } // namespace embRT

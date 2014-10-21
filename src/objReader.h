@@ -145,6 +145,8 @@ namespace embRT
     PositionsNormalsUVsTris extractData(size_t startLine, size_t endLine)
     {
         std::cout << "Extracting data from OBJ.." << std::endl;
+        auto t1 = std::chrono::high_resolution_clock::now();
+
         vector<Vertex> positions;
         vector<vec3> normals;
         vector<float> uvs;
@@ -206,8 +208,13 @@ namespace embRT
                 }
             }
         }
-        std::cout << "Done! " << "Extracted " << positions.size() << " vertices\n"<<
-            tris.size() << " triangles" << std::endl;
+        auto t2 = std::chrono::high_resolution_clock::now();
+        auto time = timePast(t1, t2);
+        auto time2 = timePast<std::chrono::milliseconds>(t1, t2);
+
+        std::cout << "Done! " << "Extracted " << positions.size() << " vertices "<<
+            tris.size() << " triangles" << " for "
+            << time << " sec " << time2 - (time * 1000) << " millisec" << std::endl;
 
         return PositionsNormalsUVsTris(positions, normals, uvs, tris);
     }
@@ -215,7 +222,8 @@ namespace embRT
     PositionsNormalsUVsTris readOBJ(const string& fileName)
     {
         std::cout << "Reading file: " << fileName << std::endl;
-
+        auto t1 = std::chrono::high_resolution_clock::now();
+        
         std::ifstream f(fileName);
         if (!f.is_open())
         {
@@ -233,7 +241,11 @@ namespace embRT
 
         auto linesCount = splitNewlines(s);
 
-        std::cout << "Done! " << linesCount << " lines read" << std::endl;
+        auto t2 = std::chrono::high_resolution_clock::now();
+        auto time = timePast(t1, t2);
+        auto time2 = timePast<std::chrono::milliseconds>(t1, t2);
+        std::cout << "Done! " << linesCount << " lines read" << " for "
+            << time << " sec " << time2 - (time * 1000) << " millisec" << std::endl;
 
         return extractData(0, lines.size());
     }

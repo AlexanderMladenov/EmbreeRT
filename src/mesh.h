@@ -6,8 +6,14 @@ namespace embRT
     struct Mesh
     {
         PositionsNormalsUVsTris m_Data;
-        
-        std::vector<Triangle> extractIndexBuffer() const
+        Lambert shader;
+
+        inline std::vector<Vertex> generateVertexBufferAligned() const
+        {
+            return std::get<0>(m_Data);
+        }
+
+        std::vector<Triangle> generateIndexBufferAligned() const
         {
             auto trisCount = std::get<3>(m_Data).size();
             auto trisData = std::get<3>(m_Data);
