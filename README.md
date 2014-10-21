@@ -4,9 +4,15 @@ EmbreeRT
 Screens
 ========
 
-![Dalek(EXTERMINATE!)](http://imgur.com/tvPsLmX)
+Dalek - 100 ms
+![Dalek(EXTERMINATE!)](http://i.imgur.com/tvPsLmX.png)
+
+Medusa Head - 500 ms
+![Medussa Head](http://i.imgur.com/U7wpWI3.png)
+
+Crytek Sponza - 200 ms
 ![Crytek Sponza with interpolated vertex normals shading](http://i.imgur.com/9q111vt.png)
-Crytek Sponza with geometric normals shading
+
 Building
 ========
 Requiremens:

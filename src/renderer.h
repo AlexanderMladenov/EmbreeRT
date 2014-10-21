@@ -120,7 +120,7 @@ namespace embRT
             if (rays.geomID[i] != RTC_INVALID_GEOMETRY_ID)
             {
                 auto& tri = triangles[rays.primID[i]];
-                if (normals.size() > 0) 
+                if (normals.size() > 1) 
                 {
                     auto n0 = normals[tri.n[0]];
                     auto n1 = normals[tri.n[1]];
