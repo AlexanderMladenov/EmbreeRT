@@ -138,9 +138,10 @@ namespace embRT
         memcpy(result.tnear, &SIMDConstants::zero, sizeof(SIMDConstants::zero)); // tnear = 0;
         memcpy(result.time, &SIMDConstants::zero, sizeof(SIMDConstants::zero)); // time = 0;
 
-        __m128i geomIDs = _mm_set1_epi32(RTC_INVALID_GEOMETRY_ID);
+        __m128i geomIDs = _mm_set1_epi32(-1);
+        __m128i primIDs = _mm_set1_epi32(0);
         memcpy(result.geomID, &geomIDs, sizeof(geomIDs)); // geomIDs = RTC_INVALID_GEOMETRY_ID
-        memcpy(result.primID, &geomIDs, sizeof(geomIDs)); // geomIDs = RTC_INVALID_GEOMETRY_ID
+        memcpy(result.primID, &primIDs, sizeof(primIDs)); // geomIDs = RTC_INVALID_GEOMETRY_ID
         __m128i maskIDs = _mm_set1_epi32(-1);
         memcpy(result.mask, &maskIDs, sizeof(maskIDs)); // geom mask = -1
 

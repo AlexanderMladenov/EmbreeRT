@@ -1,6 +1,62 @@
 #ifndef __BRDF_H
 #define __BRDF_H
 
+namespace embRT
+{
+    vec3 hemisphereSample(const vec3& normal)
+    {
+        std::uniform_real_distribution<float> randoms;
+        float u = randoms(RandomGen);
+        float v = randoms(RandomGen);
 
+        float theta = 2 * PI * u;
+        float phi = acos(sqrtf(v)) - PI / 2;
+
+        vec3 res(
+            cos(theta) * cos(phi),
+            sin(phi),
+            sin(theta) * cos(phi)
+            );
+
+        if (dot(res, normal) < 0)
+            res = -res;
+        return res;
+    }
+
+    struct Lambert
+    {
+        /*
+        std::array<vec3, 4> Evaluate4(const RTCRay4& w_in, const RTCRay4& w_out)
+        {
+            vec3 N = faceforward(w_in.dir, x.normal);
+            vec3 diffuseColor = m_Color;
+            return diffuseColor * (1.f / (float)PI) * std::max(0.f, dot(w_out.dir, N));
+        }*/
+
+        void Lambert::spawnRay(const SIMD::Vec3Packet& xNormal, const RTCRay4& w_in, RTCRay4& w_out, std::array<vec3, 4>& colorEval, float& pdf)
+        {
+            SIMD::Vec3Packet dirPack;
+            memcpy(&dirPack.x, w_in.dirx, sizeof(__m128));
+            memcpy(&dirPack.y, w_in.diry, sizeof(__m128));
+            memcpy(&dirPack.z, w_in.dirz, sizeof(__m128));
+            auto N = faceforward(dirPack, xNormal);
+            /*
+            Color diffuseColor = this->color;
+            if (texture) diffuseColor = texture->getTexColor(w_in, x.u, x.v, N);
+
+            w_out = w_in;
+
+            w_out.depth++;
+            w_out.start = x.p + N * 1e-6;
+            w_out.dir = hemisphereSample(N);
+            w_out.flags = w_out.flags | RF_DIFFUSE;
+            colorEval = diffuseColor * (1 / PI) * max(0.0, dot(w_out.dir, N));
+            pdf = dot(w_out.dir, x.normal) / (PI);*/
+        }
+
+        vec3 m_Color = vec3(1, 0.3, 0);
+    };
+
+}
 
 #endif

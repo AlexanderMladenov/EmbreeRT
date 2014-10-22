@@ -40,6 +40,10 @@ namespace embRT
     };
     struct FullTriangleData
     {
+        FullTriangleData()
+        {
+            memset(n, 0, 3 * sizeof (int));
+        }
         int v[3];
         int n[3];
         int t[3];

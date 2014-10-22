@@ -34,9 +34,9 @@ namespace embRT
     std::uint32_t ConvertPixel(const vec3& pixel)
     {
         std::uint8_t r, g, b;
-        r = (Uint8) (clamp(pixel.r, 0.f, 1.f) * 255);
-        g = (Uint8) (clamp(pixel.g, 0.f, 1.f) * 255);
-        b = (Uint8) (clamp(pixel.b, 0.f, 1.f) * 255);
+        r = (Uint8)(clamp(pixel.r, 0.f, 1.f) * 255);
+        g = (Uint8)(clamp(pixel.g, 0.f, 1.f) * 255);
+        b = (Uint8)(clamp(pixel.b, 0.f, 1.f) * 255);
 
         return (b << blueShift) | (g << greenShift) | (r << redShift);
     }
@@ -47,7 +47,7 @@ namespace embRT
     {
         for (int y = 0; y < FRAME_HEIGHT; y++)
         {
-            Uint32 *row = (Uint32*) ((Uint8*) m_Surface->pixels + y * m_Surface->pitch);
+            Uint32 *row = (Uint32*)((Uint8*)m_Surface->pixels + y * m_Surface->pitch);
             for (int x = 0; x < FRAME_WIDTH; x++)
                 row[x] = ConvertPixel(buf[x][y]);
         }
@@ -80,7 +80,7 @@ namespace embRT
         }
 
         m_Window = SDL_CreateWindow("embrt", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                    FRAME_WIDTH, FRAME_HEIGHT, SDL_WINDOW_OPENGL);
+            FRAME_WIDTH, FRAME_HEIGHT, SDL_WINDOW_OPENGL);
 
         if (!m_Window)
         {
@@ -115,12 +115,60 @@ namespace embRT
         auto& triangles = std::get<3>(data.m_Data);
 
         rtcIntersect4(&traceMask, scene, rays);
+        __m128i geomIDs = _mm_set_epi32(rays.geomID[3], rays.geomID[2], rays.geomID[1], rays.geomID[0]);
+        __m128i invalid = _mm_set1_epi32(-1);
+
+        __m128i geomMask = _mm_cmpgt_epi32(geomIDs, invalid);
+        if (_mm_movemask_epi8(geomMask) == 0)
+        {
+            return result;
+        }
+
+        __m128i primIDs = _mm_set_epi32(rays.primID[3], rays.primID[2], rays.primID[1], rays.primID[0]);
+        __m128i primMask = _mm_cmpgt_epi32(primIDs, invalid);
+        if (_mm_movemask_epi8(primMask) == 0)
+        {
+            return result;
+        }
+
         for (auto i = 0; i < 4; i++)
         {
             if (rays.geomID[i] != RTC_INVALID_GEOMETRY_ID)
             {
                 auto& tri = triangles[rays.primID[i]];
-                if (normals.size() > 1) 
+                auto n0 = normals[tri.n[0]];
+                auto n1 = normals[tri.n[1]];
+                auto n2 = normals[tri.n[2]];
+                float u = rays.u[i], v = rays.v[i], w = 1.0f - rays.u[i] - rays.v[i];
+                vec3 Ns = w * n0 + u * n1 + v * n2;
+                normalize(Ns);
+                result[3 - i] = (vec3(1.0) + Ns) * vec3(0.5);
+                //result[3 - i] = (vec3(1.0) + vec3(rays.Ngx[i], rays.Ngy[i], rays.Ngz[i])) * vec3(0.5);
+            }
+        }
+        return result;
+    }
+
+    std::array<vec3, 4> PathTrace4(RTCRay4& rays, const vec3& pathMultiplier, int depth, const RTCScene& scene, const Mesh& data)
+    {
+        std::array<vec3, 4> resultGi;
+        if (depth == MAX_TRACE_DEPTH)
+        {
+            return resultGi;
+        }
+
+        __m128i traceMask = _mm_set1_epi32(0xFFFFFFFF);
+        rtcIntersect4(&traceMask, scene, rays);
+
+        auto& normals = std::get<1>(data.m_Data);
+        auto& triangles = std::get<3>(data.m_Data);
+
+        for (auto i = 0; i < 4; i++)
+        {
+            if (rays.geomID[i] != RTC_INVALID_GEOMETRY_ID)
+            {
+                auto& tri = triangles[rays.primID[i]];
+                if (normals.size() > 1)
                 {
                     auto n0 = normals[tri.n[0]];
                     auto n1 = normals[tri.n[1]];
@@ -128,25 +176,22 @@ namespace embRT
                     float u = rays.u[i], v = rays.v[i], w = 1.0f - rays.u[i] - rays.v[i];
                     vec3 Ns = w * n0 + u * n1 + v * n2;
                     normalize(Ns);
-                    result[3 - i] = (vec3(1.0) + Ns) * vec3(0.5);
+
+                    RTCRay4 w_out;
+                    vec3 brdfEval; // brdf at the chosen direction
+                    float pdf; // the probability to choose that specific newRay
+
+                    //// sample the BRDF:
+                    //closestNode->shader->spawnRay(rays, w_out, brdfEval, pdf);
+
+                    //if (pdf < 0) return Color(1, 0, 0);  // bogus BRDF; mark in red
+                    //if (pdf == 0) return Color(0, 0, 0);  // terminate the path, as required
+                    //resultGi = PathTrace4(w_out, pathMultiplier * brdfEval / pdf, depth + 1, scene); // continue the path normally; accumulate the new term to the BRDF product
                 }
-                else 
-                    result[3 - i] = (vec3(1.0) + vec3(rays.Ngx[i], rays.Ngy[i], rays.Ngz[i])) * vec3(0.5);
             }
         }
-        return result;
-    }
 
-    std::array<vec3, 4> PathTrace(RTCRay4& rays, const RTCScene& scene, int depth)
-    {
-        std::array<vec3, 4> result;
-        __m128i traceMask = _mm_set1_epi32(0xFFFFFFFF);
-        if (depth == MAX_TRACE_DEPTH)
-        {
-            return result;
-        }
-        rtcIntersect4(&traceMask, scene, rays);
-        return result;
+        return  resultGi;
 
     }
 

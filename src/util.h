@@ -24,6 +24,14 @@
 
 namespace embRT
 {
+    inline SIMD::Vec3Packet faceforward(const SIMD::Vec3Packet& ray, const SIMD::Vec3Packet& norm)
+    {
+        __m128 dot = SIMD::Dot(ray, norm);
+        __m128 ltZero = _mm_cmplt_ps(dot, SIMDConstants::zero);
+        auto negNorm = -norm;
+        return SIMD::Or(SIMD::And(ltZero, norm), SIMD::AndNot(ltZero, negNorm));
+    }
+
     inline mat4 CreateRotationMatrix(const vec3& rot)
     {
         return rotate(radians(rot.z), vec3(0, 0, 1)) *
