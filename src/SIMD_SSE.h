@@ -14,6 +14,9 @@ namespace embRT
         const __m128 three = _mm_set1_ps(3.0f);
         const __m128 sixty = _mm_set1_ps(60.0f);
         const __m128 infinity = _mm_set1_ps(std::numeric_limits<float>::max());
+        const __m128 twoPi = _mm_set1_ps(PI2);
+        const __m128 Pi = _mm_set1_ps(PI);
+        const __m128 PiOverTwo = _mm_set1_ps(PI / 2.f);
 
     }
 

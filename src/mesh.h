@@ -6,7 +6,6 @@ namespace embRT
     struct Mesh
     {
         PositionsNormalsUVsTris m_Data;
-        Lambert shader;
 
         inline std::vector<Vertex> generateVertexBufferAligned() const
         {

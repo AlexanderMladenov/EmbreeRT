@@ -115,21 +115,6 @@ namespace embRT
         auto& triangles = std::get<3>(data.m_Data);
 
         rtcIntersect4(&traceMask, scene, rays);
-        __m128i geomIDs = _mm_set_epi32(rays.geomID[3], rays.geomID[2], rays.geomID[1], rays.geomID[0]);
-        __m128i invalid = _mm_set1_epi32(-1);
-
-        __m128i geomMask = _mm_cmpgt_epi32(geomIDs, invalid);
-        if (_mm_movemask_epi8(geomMask) == 0)
-        {
-            return result;
-        }
-
-        __m128i primIDs = _mm_set_epi32(rays.primID[3], rays.primID[2], rays.primID[1], rays.primID[0]);
-        __m128i primMask = _mm_cmpgt_epi32(primIDs, invalid);
-        if (_mm_movemask_epi8(primMask) == 0)
-        {
-            return result;
-        }
 
         for (auto i = 0; i < 4; i++)
         {

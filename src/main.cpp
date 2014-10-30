@@ -29,6 +29,7 @@
 #include <fstream>
 #include <thread>
 #include <random>
+#include <ctime>
 
 #include <SDL.h>
 #include <embree2/rtcore.h>
@@ -40,13 +41,15 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtx/transform.hpp>
 #include <immintrin.h>
+#include <xmmintrin.h>
+#include <emmintrin.h>
 
 #include "constants.h"
 #include "SIMD_SSE.h"
 
 namespace embRT
 {
-    std::mt19937 RandomGen(NULL);
+    std::mt19937 RandomGen(std::time(nullptr));
     std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> FrameBuf;
 }
 
