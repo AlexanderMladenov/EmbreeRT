@@ -49,7 +49,7 @@
 
 namespace embRT
 {
-    std::mt19937 RandomGen(std::time(nullptr));
+    std::mt19937 rng(std::time(nullptr));
     std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> FrameBuf;
 }
 
@@ -57,8 +57,8 @@ namespace embRT
 #include "camera.h"
 #include "objReader.h"
 #include "transform.h"
-#include "BRDF.h"
 #include "light.h"
+#include "BRDF.h"
 #include "mesh.h"
 #include "renderer.h"
 
@@ -68,12 +68,12 @@ void error_handler(const RTCError code, const char* str)
     printf("Embree: ");
     switch (code)
     {
-    case RTC_UNKNOWN_ERROR: printf("RTC_UNKNOWN_ERROR"); break;
-    case RTC_INVALID_ARGUMENT: printf("RTC_INVALID_ARGUMENT"); break;
-    case RTC_INVALID_OPERATION: printf("RTC_INVALID_OPERATION"); break;
-    case RTC_OUT_OF_MEMORY: printf("RTC_OUT_OF_MEMORY"); break;
-    case RTC_UNSUPPORTED_CPU: printf("RTC_UNSUPPORTED_CPU"); break;
-    default: printf("invalid error code"); break;
+        case RTC_UNKNOWN_ERROR: printf("RTC_UNKNOWN_ERROR"); break;
+        case RTC_INVALID_ARGUMENT: printf("RTC_INVALID_ARGUMENT"); break;
+        case RTC_INVALID_OPERATION: printf("RTC_INVALID_OPERATION"); break;
+        case RTC_OUT_OF_MEMORY: printf("RTC_OUT_OF_MEMORY"); break;
+        case RTC_UNSUPPORTED_CPU: printf("RTC_UNSUPPORTED_CPU"); break;
+        default: printf("invalid error code"); break;
     }
     exit(-2);
 }
@@ -96,17 +96,21 @@ int main(int argc, char* argv[])
     auto vertsCount = verts.size();
     auto indBuf = m.GenerateIndexBufferAligned();
 
-    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT , RTC_INTERSECT1);
+    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT1);
     unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, trisCount, vertsCount);
 
-    Vertex* vertices = (Vertex*)rtcMapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
+    Vertex* vertices = (Vertex*) rtcMapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
     memcpy(vertices, verts.data(), vertsCount * sizeof(Vertex));
     rtcUnmapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
 
-    Triangle* triangles = (Triangle*)rtcMapBuffer(scene, mesh, RTC_INDEX_BUFFER);
+    Triangle* triangles = (Triangle*) rtcMapBuffer(scene, mesh, RTC_INDEX_BUFFER);
     memcpy(triangles, indBuf.data(), trisCount * sizeof(Triangle));
     rtcUnmapBuffer(scene, mesh, RTC_INDEX_BUFFER);
+
     rtcCommit(scene);
+
+    AreaLight light(vec3(1));
+    light.transform.translate(vec3(-100, 500, -100));
 
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
     if (!InitVideo())
@@ -120,7 +124,7 @@ int main(int argc, char* argv[])
     //Camera cam(vec3(200, 75, -5), vec3(0, 270, 0), 100);
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    RenderToBuffer(cam, FrameBuf, scene, m);
+    RenderToBuffer(cam, FrameBuf, scene, m, light);
     auto t2 = std::chrono::high_resolution_clock::now();
     auto time = timePast(t1, t2);
     auto time2 = timePast<std::chrono::milliseconds>(t1, t2);

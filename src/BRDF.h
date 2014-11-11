@@ -6,8 +6,8 @@ namespace embRT
     vec3 hemisphereSample(const vec3& normal)
     {
         std::uniform_real_distribution<float> randoms;
-        auto u = randoms(RandomGen);
-        auto v = randoms(RandomGen);
+        auto u = randoms(rng);
+        auto v = randoms(rng);
 
         auto theta = 2 * PI * u;
         auto phi = acos(2 * v - 1) - PIHALF;
@@ -26,9 +26,10 @@ namespace embRT
     class Lambert
     {
         public:
-        vec3 shade(const RTCRay& ray, const vec3& xNormal, const AreaLight& light)
+        vec3 shade(const RTCScene& scene, RTCRay& ray, const vec3& xNormal, const AreaLight& light)
         {
             vec3 rayDir(ray.dir[0], ray.dir[1], ray.dir[2]);
+            vec3 rayOrg(ray.org[0], ray.org[1], ray.org[2]);
             // turn the normal vector towards us (if needed):
             vec3 N = faceforward(rayDir, xNormal);
 
@@ -41,24 +42,28 @@ namespace embRT
                 {
                     vec3 lightPos;
                     vec3 lightColor;
-                    light.illuminate(j, data.p, lightPos, lightColor);
-                    if (lightColor.intensity() != 0 && testVisibility(data.p + N * 1e-6, lightPos)) {
-                        Vector lightDir = lightPos - data.p;
-                        lightDir.normalize();
+                    vec3 dataP = rayOrg + ray.tfar * rayDir;
+                    auto l = light;
+                    l.illuminate(j, dataP, lightPos, lightColor);
+                    rtcOccluded(scene, ray);
+                    if ((lightColor.x + lightColor.y + lightColor.z) / 3 != 0 && ray.geomID != RTC_INVALID_GEOMETRY_ID)
+                    {
+                        vec3 lightDir = normalize(lightPos - dataP);
 
                         // get the Lambertian cosine of the angle between the geometry's normal and
                         // the direction to the light. This will scale the lighting:
-                        double cosTheta = dot(lightDir, N);
+                        float cosTheta = dot(lightDir, N);
+                        length(lightColor);
                         if (cosTheta > 0)
-                            avgColor += lightColor / (data.p - lightPos).lengthSqr() * cosTheta;
+                            avgColor += lightColor / (cosTheta * lenghtSqr(dataP - lightPos));
                     }
                 }
-                lightContrib += avgColor / numSamples;
+                lightContrib += avgColor / (float) numSamples;
             //}
             return diffuseColor * lightContrib;
         }
 
-        vec3 diffuseColor = vec(0, 0.3, 1);
+        vec3 diffuseColor = vec3(0, 0.3, 1);
     };
 
     class LambertBRDF

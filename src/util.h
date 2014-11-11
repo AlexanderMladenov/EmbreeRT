@@ -24,8 +24,6 @@
 
 namespace embRT
 {
-    std::mt19937 rng(std::time(NULL));
-
     inline vec3 faceforward(const vec3& ray, const vec3& norm)
     {
         if (dot(ray, norm) < 0) return norm;
@@ -45,6 +43,10 @@ namespace embRT
         return rotate(radians(rot.z), vec3(0, 0, 1)) *
                rotate(radians(rot.y), vec3(0, 1, 0)) *
                rotate(radians(rot.x), vec3(1, 0, 0));
+    }
+    inline float lenghtSqr(const vec3& vec)
+    {
+        return vec.x * vec.x + vec.y * vec.y + vec.z * vec.z;
     }
 
     template <typename T = float>

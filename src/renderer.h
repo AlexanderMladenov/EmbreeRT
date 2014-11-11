@@ -86,7 +86,7 @@ namespace embRT
         return true;
     }
 
-    vec3 Raytrace(RTCRay ray, const RTCScene& scene, const Mesh& data)
+    vec3 Raytrace(RTCRay ray, const RTCScene& scene, const Mesh& data, const AreaLight& light)
     {
         vec3 result(0);
         auto& normals = std::get<1>(data.m_Data);
@@ -105,7 +105,9 @@ namespace embRT
             float w = 1.0f - u - v;
             vec3 Ns = w * n0 + u * n1 + v * n2;
             normalize(Ns);
-            result = (vec3(1.0) + Ns) * vec3(0.5);
+            auto mesh = data;
+            result = mesh.m_material.shade(scene, ray, Ns, light);
+
         }
         return result;
     }
@@ -135,11 +137,11 @@ namespace embRT
 
             RTCRay w_out;
             vec3 brdfEval;
-            float pdf;
+            float pdf = 1;
 
             Lambert material;
 
-            material.spawnRay(Ns, ray, w_out, brdfEval, pdf);
+            //material.spawnRay(Ns, ray, w_out, brdfEval, pdf);
             if (pdf == 0) return vec3(0);
             resultGi = PathTrace(w_out, pathMultiplier * brdfEval / pdf, depth + 1, scene, data);
             return resultGi;
@@ -170,14 +172,14 @@ namespace embRT
         SwapBuffers(buf);
     }
 
-    void RenderToBuffer(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf, const RTCScene& scene, const Mesh& data)
+    void RenderToBuffer(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf, const RTCScene& scene, const Mesh& data, const AreaLight& light)
     {
         for (auto x = 0; x < FRAME_WIDTH; x++)
         {
             for (auto y = 0; y < FRAME_HEIGHT; y++)
             {
                 auto ray = cam.GetRay(x, y);
-                buf[x][y] = Raytrace(ray, scene, data);
+                buf[x][y] = Raytrace(ray, scene, data, light);
             }
         }
         SwapBuffers(buf);
