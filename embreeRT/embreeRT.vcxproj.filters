@@ -53,7 +53,7 @@
     <ClInclude Include="..\src\transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ray.h">
+    <ClInclude Include="..\src\light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
