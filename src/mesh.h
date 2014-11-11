@@ -7,12 +7,14 @@ namespace embRT
     {
         PositionsNormalsUVsTris m_Data;
 
-        inline std::vector<Vertex> generateVertexBufferAligned() const
+        Lambert m_material;
+
+        inline std::vector<Vertex> GenerateVertexBufferAligned() const
         {
             return std::get<0>(m_Data);
         }
 
-        std::vector<Triangle> generateIndexBufferAligned() const
+        std::vector<Triangle> GenerateIndexBufferAligned() const
         {
             auto trisCount = std::get<3>(m_Data).size();
             auto trisData = std::get<3>(m_Data);

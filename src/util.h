@@ -24,6 +24,14 @@
 
 namespace embRT
 {
+    std::mt19937 rng(std::time(NULL));
+
+    inline vec3 faceforward(const vec3& ray, const vec3& norm)
+    {
+        if (dot(ray, norm) < 0) return norm;
+        else return -norm;
+    }
+
     inline SIMD::Vec3Packet faceforward(const SIMD::Vec3Packet& ray, const SIMD::Vec3Packet& norm)
     {
         __m128 dot = SIMD::Dot(ray, norm);

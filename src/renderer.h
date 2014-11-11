@@ -1,24 +1,3 @@
-/* The MIT License(MIT)
-*
-* Copyright(c) 2014 Alexander Mladenov
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files(the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions :
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE. */
-
 #ifndef __RENDERER_H
 #define __RENDERER_H
 
@@ -34,9 +13,9 @@ namespace embRT
     std::uint32_t ConvertPixel(const vec3& pixel)
     {
         std::uint8_t r, g, b;
-        r = (Uint8)(clamp(pixel.r, 0.f, 1.f) * 255);
-        g = (Uint8)(clamp(pixel.g, 0.f, 1.f) * 255);
-        b = (Uint8)(clamp(pixel.b, 0.f, 1.f) * 255);
+        r = (Uint8) (clamp(pixel.r, 0.f, 1.f) * 255);
+        g = (Uint8) (clamp(pixel.g, 0.f, 1.f) * 255);
+        b = (Uint8) (clamp(pixel.b, 0.f, 1.f) * 255);
 
         return (b << blueShift) | (g << greenShift) | (r << redShift);
     }
@@ -47,7 +26,7 @@ namespace embRT
     {
         for (int y = 0; y < FRAME_HEIGHT; y++)
         {
-            Uint32 *row = (Uint32*)((Uint8*)m_Surface->pixels + y * m_Surface->pitch);
+            Uint32 *row = (Uint32*) ((Uint8*) m_Surface->pixels + y * m_Surface->pitch);
             for (int x = 0; x < FRAME_WIDTH; x++)
                 row[x] = ConvertPixel(buf[x][y]);
         }
@@ -80,7 +59,7 @@ namespace embRT
         }
 
         m_Window = SDL_CreateWindow("embrt", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            FRAME_WIDTH, FRAME_HEIGHT, SDL_WINDOW_OPENGL);
+                                    FRAME_WIDTH, FRAME_HEIGHT, SDL_WINDOW_OPENGL);
 
         if (!m_Window)
         {
@@ -107,6 +86,102 @@ namespace embRT
         return true;
     }
 
+    vec3 Raytrace(RTCRay ray, const RTCScene& scene, const Mesh& data)
+    {
+        vec3 result(0);
+        auto& normals = std::get<1>(data.m_Data);
+        auto& triangles = std::get<3>(data.m_Data);
+
+        rtcIntersect(scene, ray);
+        if (ray.geomID != RTC_INVALID_GEOMETRY_ID)
+        {
+            auto& tri = triangles[ray.primID];
+            auto n0 = normals[tri.n[0]];
+            auto n1 = normals[tri.n[1]];
+            auto n2 = normals[tri.n[2]];
+
+            float u = ray.u;
+            float v = ray.v;
+            float w = 1.0f - u - v;
+            vec3 Ns = w * n0 + u * n1 + v * n2;
+            normalize(Ns);
+            result = (vec3(1.0) + Ns) * vec3(0.5);
+        }
+        return result;
+    }
+
+    vec3 PathTrace(RTCRay& ray, const vec3& pathMultiplier, int depth, const RTCScene& scene, const Mesh& data)
+    {
+        vec3 resultGi;
+        if (depth == MAX_TRACE_DEPTH)
+        {
+            return resultGi;
+        }
+        static auto& normals = std::get<1>(data.m_Data);
+        static auto& triangles = std::get<3>(data.m_Data);
+        rtcIntersect(scene, ray);
+        if (ray.geomID != RTC_INVALID_GEOMETRY_ID)
+        {
+            auto& tri = triangles[ray.primID];
+            auto n0 = normals[tri.n[0]];
+            auto n1 = normals[tri.n[1]];
+            auto n2 = normals[tri.n[2]];
+
+            float u = ray.u;
+            float v = ray.v;
+            float w = 1.0f - u - v;
+            vec3 Ns = w * n0 + u * n1 + v * n2;
+            normalize(Ns);
+
+            RTCRay w_out;
+            vec3 brdfEval;
+            float pdf;
+
+            Lambert material;
+
+            material.spawnRay(Ns, ray, w_out, brdfEval, pdf);
+            if (pdf == 0) return vec3(0);
+            resultGi = PathTrace(w_out, pathMultiplier * brdfEval / pdf, depth + 1, scene, data);
+            return resultGi;
+        }
+
+        return  resultGi;
+
+    }
+    void PathTraceToBuffer(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf, const RTCScene& scene, const Mesh& data)
+    {
+        std::mt19937 rng(std::time(NULL));
+        std::uniform_real_distribution<float> dst;
+        for (auto x = 0; x < FRAME_WIDTH; x++)
+        {
+            for (auto y = 0; y < FRAME_HEIGHT; y++)
+            {
+                vec3 average(0);
+                for (auto i = 0; i < PIXEL_PATHS; i++)
+                {
+                    average += PathTrace(cam.GetRay(x + dst(rng), y + dst(rng)), vec3(1), 0, scene, data);
+                }
+                average / (float) PIXEL_PATHS;
+                buf[x][y] = average;
+                std::cout << x << " " << y << std::endl;
+                SwapBuffers(buf);
+            }
+        }
+        SwapBuffers(buf);
+    }
+
+    void RenderToBuffer(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf, const RTCScene& scene, const Mesh& data)
+    {
+        for (auto x = 0; x < FRAME_WIDTH; x++)
+        {
+            for (auto y = 0; y < FRAME_HEIGHT; y++)
+            {
+                auto ray = cam.GetRay(x, y);
+                buf[x][y] = Raytrace(ray, scene, data);
+            }
+        }
+        SwapBuffers(buf);
+    }
     std::array<vec3, 4> Raytrace4(RTCRay4& rays, const RTCScene& scene, const Mesh& data)
     {
         std::array<vec3, 4> result;
@@ -134,51 +209,7 @@ namespace embRT
         return result;
     }
 
-    std::array<vec3, 4> PathTrace4(RTCRay4& rays, const vec3& pathMultiplier, int depth, const RTCScene& scene, const Mesh& data)
-    {
-        std::array<vec3, 4> resultGi;
-        if (depth == MAX_TRACE_DEPTH)
-        {
-            return resultGi;
-        }
 
-        __m128i traceMask = _mm_set1_epi32(0xFFFFFFFF);
-        rtcIntersect4(&traceMask, scene, rays);
-
-        auto& normals = std::get<1>(data.m_Data);
-        auto& triangles = std::get<3>(data.m_Data);
-
-        for (auto i = 0; i < 4; i++)
-        {
-            if (rays.geomID[i] != RTC_INVALID_GEOMETRY_ID)
-            {
-                auto& tri = triangles[rays.primID[i]];
-                if (normals.size() > 1)
-                {
-                    auto n0 = normals[tri.n[0]];
-                    auto n1 = normals[tri.n[1]];
-                    auto n2 = normals[tri.n[2]];
-                    float u = rays.u[i], v = rays.v[i], w = 1.0f - rays.u[i] - rays.v[i];
-                    vec3 Ns = w * n0 + u * n1 + v * n2;
-                    normalize(Ns);
-
-                    RTCRay4 w_out;
-                    vec3 brdfEval; // brdf at the chosen direction
-                    float pdf; // the probability to choose that specific newRay
-
-                    //// sample the BRDF:
-                    //closestNode->shader->spawnRay(rays, w_out, brdfEval, pdf);
-
-                    //if (pdf < 0) return Color(1, 0, 0);  // bogus BRDF; mark in red
-                    //if (pdf == 0) return Color(0, 0, 0);  // terminate the path, as required
-                    //resultGi = PathTrace4(w_out, pathMultiplier * brdfEval / pdf, depth + 1, scene); // continue the path normally; accumulate the new term to the BRDF product
-                }
-            }
-        }
-
-        return  resultGi;
-
-    }
 
     void RenderToBuffer4(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf, const RTCScene& scene, const Mesh& data)
     {

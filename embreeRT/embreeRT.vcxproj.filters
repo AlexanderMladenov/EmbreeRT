@@ -50,5 +50,11 @@
     <ClInclude Include="..\src\mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\transform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

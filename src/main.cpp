@@ -56,7 +56,9 @@ namespace embRT
 #include "util.h"
 #include "camera.h"
 #include "objReader.h"
+#include "transform.h"
 #include "BRDF.h"
+#include "light.h"
 #include "mesh.h"
 #include "renderer.h"
 
@@ -88,13 +90,13 @@ int main(int argc, char* argv[])
     //m.m_Data = readOBJ("../resources/sponza.obj");
     m.m_Data = readOBJ("../resources/teapot_lowres.obj");
 
-    auto& verts = m.generateVertexBufferAligned();
+    auto& verts = m.GenerateVertexBufferAligned();
 
     auto trisCount = std::get<3>(m.m_Data).size();
     auto vertsCount = verts.size();
-    auto indBuf = m.generateIndexBufferAligned();
+    auto indBuf = m.GenerateIndexBufferAligned();
 
-    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT , RTC_INTERSECT4);
+    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT , RTC_INTERSECT1);
     unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, trisCount, vertsCount);
 
     Vertex* vertices = (Vertex*)rtcMapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
@@ -118,7 +120,7 @@ int main(int argc, char* argv[])
     //Camera cam(vec3(200, 75, -5), vec3(0, 270, 0), 100);
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    RenderToBuffer4(cam, FrameBuf, scene, m);
+    RenderToBuffer(cam, FrameBuf, scene, m);
     auto t2 = std::chrono::high_resolution_clock::now();
     auto time = timePast(t1, t2);
     auto time2 = timePast<std::chrono::milliseconds>(t1, t2);
