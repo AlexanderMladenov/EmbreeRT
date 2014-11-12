@@ -3,107 +3,76 @@
 
 namespace embRT
 {
-    vec3 hemisphereSample(const vec3& normal)
-    {
-        std::uniform_real_distribution<float> randoms;
-        auto u = randoms(rng);
-        auto v = randoms(rng);
-
-        auto theta = 2 * PI * u;
-        auto phi = acos(2 * v - 1) - PIHALF;
-
-        vec3 res(
-            cos(theta) * cos(phi),
-            sin(phi),
-            sin(theta) * cos(phi)
-            );
-
-        if (dot(res, normal) < 0)
-            res = -res;
-        return res;
-    }
-    
+    //    vec3 hemisphereSample(const vec3& normal)
+    //    {
+    //        std::uniform_real_distribution<float> randoms;
+    //        auto u = randoms(rng);
+    //        auto v = randoms(rng);
+    //
+    //        auto theta = 2 * PI * u;
+    //        auto phi = acos(2 * v - 1) - PIHALF;
+    //
+    //        vec3 res(
+    //            cos(theta) * cos(phi),
+    //            sin(phi),
+    //            sin(theta) * cos(phi)
+    //            );
+    //
+    //        if (dot(res, normal) < 0)
+    //            res = -res;
+    //        return res;
+    //    }
+    //
     class Lambert
     {
         public:
-        vec3 shade(const RTCScene& scene, RTCRay& ray, const vec3& xNormal, const AreaLight& light)
+        vec3 shade(const RTCScene& scene, RTCRay& ray, const vec3& xNormal, const AreaLight& light) const
         {
+
             vec3 rayDir(ray.dir[0], ray.dir[1], ray.dir[2]);
-            vec3 rayOrg(ray.org[0], ray.org[1], ray.org[2]);
+            vec3 rayStart(ray.org[0], ray.org[1], ray.org[2]);
             // turn the normal vector towards us (if needed):
             vec3 N = faceforward(rayDir, xNormal);
 
-            auto lightContrib = vec3(0.01);
+            vec3 lightContrib(0.2);
+            vec3 intrPoint = rayStart + ray.tfar * rayDir;
+            vec3 shadowRayStart = intrPoint + 1e-3f * N;
+            vec3 lightPos(200, 100, -500);
+            vec3 shadowRayDir = normalize(lightPos - shadowRayStart);
 
-            //for (auto i = 0 i < (int) scene.lights.size(); i++) {
-            const static int numSamples = light.NumSamples();
-                vec3 avgColor(0);
-                for (auto j = 0; j < numSamples; j++) 
-                {
-                    vec3 lightPos;
-                    vec3 lightColor;
-                    vec3 dataP = rayOrg + ray.tfar * rayDir;
-                    auto l = light;
-                    l.illuminate(j, dataP, lightPos, lightColor);
-                    rtcOccluded(scene, ray);
-                    if ((lightColor.x + lightColor.y + lightColor.z) / 3 != 0 && ray.geomID != RTC_INVALID_GEOMETRY_ID)
-                    {
-                        vec3 lightDir = normalize(lightPos - dataP);
+            RTCRay shadowRay;
+            shadowRay.org[0] = shadowRayStart.x;
+            shadowRay.org[1] = shadowRayStart.y;
+            shadowRay.org[2] = shadowRayStart.z;
 
-                        // get the Lambertian cosine of the angle between the geometry's normal and
-                        // the direction to the light. This will scale the lighting:
-                        float cosTheta = dot(lightDir, N);
-                        length(lightColor);
-                        if (cosTheta > 0)
-                            avgColor += lightColor / (cosTheta * lenghtSqr(dataP - lightPos));
-                    }
-                }
-                lightContrib += avgColor / (float) numSamples;
-            //}
-            return diffuseColor * lightContrib;
+            shadowRay.dir[0] = shadowRayDir.x;
+            shadowRay.dir[1] = shadowRayDir.y;
+            shadowRay.dir[2] = shadowRayDir.z;
+
+            shadowRay.tfar = std::numeric_limits<float>::max();
+            shadowRay.tnear = 0.f;
+            shadowRay.time = 0.f;
+            shadowRay.geomID = RTC_INVALID_GEOMETRY_ID;
+            shadowRay.primID = RTC_INVALID_GEOMETRY_ID;
+            shadowRay.mask = -1;
+
+            rtcOccluded(scene, shadowRay);
+            if (shadowRay.geomID != 0)
+            {
+                vec3 lightDir = lightPos - intrPoint;
+                normalize(lightDir);
+
+                // get the Lambertian cosine of the angle between the geometry's normal and
+                // the direction to the light. This will scale the lighting:
+                float cosTheta = dot(lightDir, N);
+
+                lightContrib += vec3(1, 1, 1) * 120000.f / lenghtSqr(intrPoint - lightPos) * cosTheta;
+            }
+            return vec3(0, 0.3, 1) * lightContrib;
         }
-
-        vec3 diffuseColor = vec3(0, 0.3, 1);
     };
 
-    class LambertBRDF
-    {
-        public:
-        vec3 eval(const RTCRay& x, const RTCRay& w_in, const vec3& w_out)
-        {
-            vec3 w_in_dir(w_in.dir[0], w_in.dir[1], w_in.dir[2]);
-            //vec3 x_normal(x.n)
-           /* vec3 N = faceforward(w_in_dir, x.normal);
-            Color diffuseColor = this->color;
-            return diffuseColor * (1 / PI) * max(0.0, dot(w_out.dir, N));*/
-            return m_Color;
-        }
-
-        void spawnRay(const vec3& xNormal, const RTCRay& w_in, RTCRay& w_out, vec3& colorEval, float& pdf)
-        {
-            vec3 w_in_dir(w_in.dir[0], w_in.dir[1], w_in.dir[2]);
-            vec3 N = faceforward(w_in_dir, xNormal);
-
-            w_out = w_in;
-            vec3 w_out_org(w_out.org[0], w_out.org[1], w_out.org[2]);
-            w_out_org += 1e-4f * N;
-            w_out.org[0] = w_out_org.x;
-            w_out.org[1] = w_out_org.y;
-            w_out.org[2] = w_out_org.z;
-
-            vec3 w_out_dir = hemisphereSample(N);
-            normalize(w_out_dir);
-            w_out.dir[0] = w_out_dir.x;
-            w_out.dir[1] = w_out_dir.y;
-            w_out.dir[2] = w_out_dir.z;
-
-            colorEval = vec3(0.1) +  m_Color * (1 / PI) * std::max(0.f, dot(w_out_dir, N));
-            pdf = 1.f / (2.f * PI);
-        }
-
-        vec3 m_Color = vec3(1, 0.3, 0);
-    };
-
+ 
 }
 
 #endif

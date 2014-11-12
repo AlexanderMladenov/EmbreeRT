@@ -60,6 +60,7 @@ namespace embRT
 #include "light.h"
 #include "BRDF.h"
 #include "mesh.h"
+#include "scene.h"
 #include "renderer.h"
 
 /* error reporting function */
@@ -87,8 +88,8 @@ int main(int argc, char* argv[])
     rtcSetErrorFunction(error_handler);
 
     Mesh m;
-    //m.m_Data = readOBJ("../resources/sponza.obj");
-    m.m_Data = readOBJ("../resources/teapot_lowres.obj");
+    m.m_Data = readOBJ("../resources/sponza.obj");
+    //m.m_Data = readOBJ("../resources/teapot_lowres.obj");
 
     auto& verts = m.GenerateVertexBufferAligned();
 
@@ -120,8 +121,8 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    Camera cam(vec3(0, 1, -7), vec3(0, 0, 0), 100);
-    //Camera cam(vec3(200, 75, -5), vec3(0, 270, 0), 100);
+    //Camera cam(vec3(0, 3, -7), vec3(20, 0, 0), 100);
+    Camera cam(vec3(200, 75, -5), vec3(0, 270, 0), 100);
 
     auto t1 = std::chrono::high_resolution_clock::now();
     RenderToBuffer(cam, FrameBuf, scene, m, light);

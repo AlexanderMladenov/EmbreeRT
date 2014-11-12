@@ -140,6 +140,7 @@
       <AdditionalLibraryDirectories>..\libs\embree-bin-2.3.3_win\lib\x64;..\libs\SDL2-2.0.3\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>embree.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>false</AssemblyDebug>
+      <SubSystem>NotSet</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -155,6 +156,7 @@
     <ClInclude Include="..\src\objReader.h" />
     <ClInclude Include="..\src\light.h" />
     <ClInclude Include="..\src\renderer.h" />
+    <ClInclude Include="..\src\scene.h" />
     <ClInclude Include="..\src\SIMD_SSE.h" />
     <ClInclude Include="..\src\transform.h" />
     <ClInclude Include="..\src\util.h" />
