@@ -37,7 +37,8 @@ namespace embRT
             vec3 lightContrib(0.2);
             vec3 intrPoint = rayStart + ray.tfar * rayDir;
             vec3 shadowRayStart = intrPoint + 1e-3f * N;
-            vec3 lightPos(-100, 1500, -5);
+            //vec3 lightPos(-100, 1500, -5); // sponza pos
+            vec3 lightPos(100, 1000, -100);
             vec3 shadowRayDir = normalize(lightPos - shadowRayStart);
 
             RTCRay shadowRay;
