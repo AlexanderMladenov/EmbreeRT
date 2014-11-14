@@ -17,7 +17,6 @@ namespace embRT
         const __m128 twoPi = _mm_set1_ps(PI2);
         const __m128 Pi = _mm_set1_ps(PI);
         const __m128 PiOverTwo = _mm_set1_ps(PI / 2.f);
-
     }
 
     using namespace glm;

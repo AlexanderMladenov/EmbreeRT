@@ -105,8 +105,13 @@ namespace embRT
             float w = 1.0f - u - v;
             vec3 Ns = w * n0 + u * n1 + v * n2;
             normalize(Ns);
-            
-            result = data.m_material.shade(scene, ray, Ns, light);
+            vec3 geomN = normalize(vec3(ray.Ng[0], ray.Ng[1], ray.Ng[2]));
+            if (ray.geomID == 1)
+            {
+                result = data.m_material.shade(scene, ray, geomN, light);
+                return result;
+            }
+            result =  data.m_material.shade(scene, ray, Ns, light);
 
         }
         return result;
@@ -134,12 +139,10 @@ namespace embRT
             float w = 1.0f - u - v;
             vec3 Ns = w * n0 + u * n1 + v * n2;
             normalize(Ns);
-
             RTCRay w_out;
             vec3 brdfEval;
             float pdf = 1;
 
-//            Lambert material;
 
             //material.spawnRay(Ns, ray, w_out, brdfEval, pdf);
             if (pdf == 0) return vec3(0);

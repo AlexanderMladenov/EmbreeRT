@@ -37,7 +37,7 @@ namespace embRT
             vec3 lightContrib(0.2);
             vec3 intrPoint = rayStart + ray.tfar * rayDir;
             vec3 shadowRayStart = intrPoint + 1e-3f * N;
-            vec3 lightPos(200, 100, -500);
+            vec3 lightPos(-100, 1500, -5);
             vec3 shadowRayDir = normalize(lightPos - shadowRayStart);
 
             RTCRay shadowRay;
@@ -55,8 +55,12 @@ namespace embRT
             shadowRay.geomID = RTC_INVALID_GEOMETRY_ID;
             shadowRay.primID = RTC_INVALID_GEOMETRY_ID;
             shadowRay.mask = -1;
-
-            rtcOccluded(scene, shadowRay);
+            auto tempDist = (lightPos - shadowRayStart).length();
+            rtcIntersect(scene, shadowRay);
+            if (shadowRay.tfar <= tempDist)
+            {
+                return vec3(0, 0.3, 1) * lightContrib;
+            }
             if (shadowRay.geomID != 0)
             {
                 vec3 lightDir = lightPos - intrPoint;
@@ -66,7 +70,7 @@ namespace embRT
                 // the direction to the light. This will scale the lighting:
                 float cosTheta = dot(lightDir, N);
 
-                lightContrib += vec3(1, 1, 1) * 120000.f / lenghtSqr(intrPoint - lightPos) * cosTheta;
+                lightContrib += vec3(1, 1, 1) * 800.f / lenghtSqr(intrPoint - lightPos) * cosTheta;
             }
             return vec3(0, 0.3, 1) * lightContrib;
         }
