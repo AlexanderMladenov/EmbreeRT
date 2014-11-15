@@ -125,9 +125,11 @@ int main(int argc, char* argv[])
     rtcUnmapBuffer(scene, plane, RTC_INDEX_BUFFER);
 
     rtcCommit(scene);
+    AreaLight light;
+    light.transform.translate(vec3(100, 700, 500));
+    light.transform.scale(vec3(40));
 
-    AreaLight light(vec3(1));
-    light.transform.translate(vec3(-100, 500, -100));
+    light.init();
 
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
     if (!InitVideo())
@@ -137,7 +139,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    Camera cam(vec3(0, 3, -7), vec3(20, 0, 0), 100); // teapot
+   Camera cam(vec3(0, 3, -7), vec3(20, 0, 0), 100); // teapot
     //Camera cam(vec3(0, 30, -7), vec3(20, 90, 0), 100); // dust 2
     //Camera cam(vec3(-200, 100, -5), vec3(0, 270, 0), 100); // sponza
 

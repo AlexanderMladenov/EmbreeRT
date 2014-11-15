@@ -12,26 +12,25 @@ namespace embRT
         vec3 color;
         float power;
 
-        AreaLight(const vec3&col, int xs = 4, int ys = 4, float power = 14): xSubd(xs), ySubd(ys), color(col), power(power)
+        AreaLight(){ xSubd = 20; ySubd = 20; transform.reset(); color = vec3(1); power = 14; }
+        void init()
         {
             center = transform.point(vec3(0));
             vec3 a = transform.point(vec3(-0.5, 0.0, -0.5));
             vec3 b = transform.point(vec3(0.5, 0.0, -0.5));
             vec3 c = transform.point(vec3(0.5, 0.0, 0.5));
-            float width = (float) (b - a).length();
-            float height = (float) (b - c).length();
-            area = width * height;
+            float width = (float)(b - a).length();
+            float height = (float)(b - c).length();
+            area = width * height; // obtain the area of the light, in world space
         }
-
         const int NumSamples() const
         {
             return xSubd * ySubd;
         }
-
-        void illuminate(int sampleIdx, const vec3& shadePos, vec3& samplePos, vec3& color)
+        void illuminate(int sampleIdx, const vec3& shadePos, vec3& samplePos, vec3& color) const
         {
-
             std::uniform_real_distribution<float> roll;
+
             // convert the shade point onto the light's canonic space:
             vec3 shadePosCanonical = transform.undoPoint(shadePos);
 

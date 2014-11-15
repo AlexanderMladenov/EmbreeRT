@@ -11,6 +11,7 @@ namespace embRT
 #define PIHALF 1.57079632679f
 #define MAX_TRACE_DEPTH 3
 #define PIXEL_PATHS 5
+
 } // namespace embRT
 
 #endif
