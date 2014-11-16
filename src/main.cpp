@@ -126,9 +126,9 @@ int main(int argc, char* argv[])
 
     rtcCommit(scene);
     AreaLight light;
-    light.transform.translate(vec3(100, 700, 500));
+    light.transform.translate(vec3(10, 10, 10));
     // do not swap with translate, fucks up soft shadows
-    light.transform.scale(vec3(40));
+    light.transform.scale(vec3(5));
 
     light.init();
 

@@ -3,7 +3,8 @@ EmbreeRT
 
 Screens
 ========
-
+Soft Shadows!
+![Teapot](http://i.imgur.com/EXv9jav.png)
 Dalek - 100 ms
 ![Dalek(EXTERMINATE!)](http://i.imgur.com/tvPsLmX.png)
 

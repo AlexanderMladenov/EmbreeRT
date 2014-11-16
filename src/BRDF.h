@@ -111,7 +111,7 @@ namespace embRT
                 shadowRay.primID = RTC_INVALID_GEOMETRY_ID;
                 shadowRay.mask = -1;
                 rtcOccluded(scene, shadowRay);
-                if (shadowRay.geomID != 0)
+                if (shadowRay.geomID == RTC_INVALID_GEOMETRY_ID)
                 {
                     vec3 lightDir = lightPos - intrPoint;
                     normalize(lightDir);
