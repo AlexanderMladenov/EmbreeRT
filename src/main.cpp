@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 
     light.init();
 
-   Camera cam(vec3(0, 3, -7), vec3(20, 0, 0), 100); // teapot
+    Camera cam(vec3(0, 3, -7), vec3(20, 0, 0), 100); // teapot
     //Camera cam(vec3(0, 30, -7), vec3(20, 90, 0), 100); // dust 2
     //Camera cam(vec3(-200, 100, -5), vec3(0, 270, 0), 100); // sponza
 
