@@ -111,68 +111,10 @@ namespace embRT
                 result = data.m_material.shade(scene, ray, geomN, light);
                 return result;
             }
-            result =  data.m_material.shade(scene, ray, Ns, light);
+            result = data.m_material.shade(scene, ray, Ns, light);
 
         }
         return result;
-    }
-
-    vec3 PathTrace(RTCRay& ray, const vec3& pathMultiplier, int depth, const RTCScene& scene, const Mesh& data)
-    {
-        vec3 resultGi;
-        if (depth == MAX_TRACE_DEPTH)
-        {
-            return resultGi;
-        }
-        static auto& normals = std::get<1>(data.m_Data);
-        static auto& triangles = std::get<3>(data.m_Data);
-        rtcIntersect(scene, ray);
-        if (ray.geomID != RTC_INVALID_GEOMETRY_ID)
-        {
-            auto& tri = triangles[ray.primID];
-            auto n0 = normals[tri.n[0]];
-            auto n1 = normals[tri.n[1]];
-            auto n2 = normals[tri.n[2]];
-
-            float u = ray.u;
-            float v = ray.v;
-            float w = 1.0f - u - v;
-            vec3 Ns = w * n0 + u * n1 + v * n2;
-            normalize(Ns);
-            RTCRay w_out;
-            vec3 brdfEval;
-            float pdf = 1;
-
-
-            //material.spawnRay(Ns, ray, w_out, brdfEval, pdf);
-            if (pdf == 0) return vec3(0);
-            //resultGi = PathTrace(w_out, pathMultiplier * brdfEval / pdf, depth + 1, scene, data);
-            return resultGi;
-        }
-
-        return  resultGi;
-
-    }
-    void PathTraceToBuffer(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf, const RTCScene& scene, const Mesh& data)
-    {
-        std::mt19937 rng(std::time(NULL));
-        std::uniform_real_distribution<float> dst;
-        for (auto x = 0; x < FRAME_WIDTH; x++)
-        {
-            for (auto y = 0; y < FRAME_HEIGHT; y++)
-            {
-                vec3 average(0);
-                for (auto i = 0; i < PIXEL_PATHS; i++)
-                {
-                   // average += PathTrace(cam.GetRay(x + dst(rng), y + dst(rng)), vec3(1), 0, scene, data);
-                }
-                average / (float) PIXEL_PATHS;
-                buf[x][y] = average;
-                std::cout << x << " " << y << std::endl;
-               // SwapBuffers(buf);
-            }
-        }
-       // SwapBuffers(buf);
     }
 
     void RenderToBuffer(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf, const RTCScene& scene, const Mesh& data, const AreaLight& light)
@@ -185,8 +127,40 @@ namespace embRT
                 buf[x][y] = Raytrace(ray, scene, data, light);
             }
         }
-        SwapBuffers(buf);
     }
+
+    void renderReginon(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf,
+        const RTCScene& scene, const Mesh& data, const AreaLight& light, int xFrom, int xTo)
+    {
+        for (auto x = xFrom; x < xTo; x++)
+        {
+            for (auto y = 0; y < FRAME_HEIGHT; y++)
+            {
+                auto ray = cam.GetRay(x, y);
+                buf[x][y] = Raytrace(ray, scene, data, light);
+            }
+        }
+        return;
+    }
+
+    void RenderToBufferThreaded(const Camera& cam, std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH>& buf,
+        const RTCScene& scene, const Mesh& data, const AreaLight& light)
+    {
+        auto numThreads = std::thread::hardware_concurrency();
+        int delta = FRAME_WIDTH / numThreads;
+        std::vector <std::thread> threads;
+        for (int i = 0; i < numThreads; i++)
+        {
+            auto fun = std::bind(&renderReginon,cam, std::ref(buf), std::ref(scene), std::ref(data), light, delta * i, delta * i + delta);
+            threads.emplace_back(fun);
+        }
+        for (int i = 0; i < numThreads; i++)
+        {
+        threads[i].join();
+        }
+        return;
+    }
+
     std::array<vec3, 4> Raytrace4(RTCRay4& rays, const RTCScene& scene, const Mesh& data)
     {
         std::array<vec3, 4> result;

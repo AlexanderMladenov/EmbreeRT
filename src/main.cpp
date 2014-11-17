@@ -1,24 +1,3 @@
-/* The MIT License(MIT)
- *
- * Copyright(c) 2014 Alexander Mladenov
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files(the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions :
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE. */
-
 #include <iostream>
 #include <chrono>
 #include <array>
@@ -30,6 +9,7 @@
 #include <thread>
 #include <random>
 #include <ctime>
+#include <functional>
 
 #include <SDL.h>
 #include <embree2/rtcore.h>
@@ -132,6 +112,16 @@ int main(int argc, char* argv[])
 
     light.init();
 
+   Camera cam(vec3(0, 3, -7), vec3(20, 0, 0), 100); // teapot
+    //Camera cam(vec3(0, 30, -7), vec3(20, 90, 0), 100); // dust 2
+    //Camera cam(vec3(-200, 100, -5), vec3(0, 270, 0), 100); // sponza
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+    RenderToBufferThreaded(cam, FrameBuf, scene, m, light);
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto time = timePast(t1, t2);
+    auto time2 = timePast<std::chrono::milliseconds>(t1, t2);
+    auto ms = time2 - (time * 1000);
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
     if (!InitVideo())
     {
@@ -139,17 +129,7 @@ int main(int argc, char* argv[])
         SDL_Quit();
         return -1;
     }
-
-   Camera cam(vec3(0, 3, -7), vec3(20, 0, 0), 100); // teapot
-    //Camera cam(vec3(0, 30, -7), vec3(20, 90, 0), 100); // dust 2
-    //Camera cam(vec3(-200, 100, -5), vec3(0, 270, 0), 100); // sponza
-
-    auto t1 = std::chrono::high_resolution_clock::now();
-    RenderToBuffer(cam, FrameBuf, scene, m, light);
-    auto t2 = std::chrono::high_resolution_clock::now();
-    auto time = timePast(t1, t2);
-    auto time2 = timePast<std::chrono::milliseconds>(t1, t2);
-    auto ms = time2 - (time * 1000);
+    SwapBuffers(FrameBuf);
 
     std::stringstream ss;
     ss << "embRT: " << time << " s " << ms << " ms" << std::endl;

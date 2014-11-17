@@ -12,7 +12,7 @@ namespace embRT
         vec3 color;
         float power;
 
-        AreaLight(){ xSubd = 20; ySubd = 20; transform.reset(); color = vec3(1); power = 5; }
+        AreaLight(){ xSubd = 5; ySubd = 5; transform.reset(); color = vec3(1); power = 5; }
         void init()
         {
             center = transform.point(vec3(0));
