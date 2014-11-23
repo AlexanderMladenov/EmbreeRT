@@ -49,8 +49,9 @@ namespace embRT
             shadowRay.dir[0] = shadowRayDir.x;
             shadowRay.dir[1] = shadowRayDir.y;
             shadowRay.dir[2] = shadowRayDir.z;
+            auto lightDist = (lightPos - shadowRayStart).length();
 
-            shadowRay.tfar = std::numeric_limits<float>::max();
+            shadowRay.tfar = lightDist;
             shadowRay.tnear = 0.f;
             shadowRay.time = 0.f;
             shadowRay.geomID = RTC_INVALID_GEOMETRY_ID;
@@ -99,14 +100,15 @@ namespace embRT
                 shadowRay.dir[1] = shadowRayDir.y;
                 shadowRay.dir[2] = shadowRayDir.z;
 
-                shadowRay.tfar = std::numeric_limits<float>::max();
+                auto lightDist = (lightPos - shadowRayStart).length();
+
+                shadowRay.tfar = lightDist;
                 shadowRay.tnear = 0.f;
                 shadowRay.time = 0.f;
                 shadowRay.geomID = RTC_INVALID_GEOMETRY_ID;
                 shadowRay.primID = RTC_INVALID_GEOMETRY_ID;
                 shadowRay.mask = -1;
-                auto lightDist = (lightPos - shadowRayStart).length();
-                rtcIntersect(scene, shadowRay);
+                rtcOccluded(scene, shadowRay);
                 if (shadowRay.geomID == RTC_INVALID_GEOMETRY_ID)
                 {
                     vec3 lightDir = lightPos - intrPoint;
@@ -117,20 +119,6 @@ namespace embRT
                     float cosTheta = dot(lightDir, N);
                     if (cosTheta > 0)
                         avg += lightCol / lenghtSqr(intrPoint - lightPos) * cosTheta;
-                }
-                else
-                {
-                    if (shadowRay.tfar > lightDist)
-                    {
-                        vec3 lightDir = lightPos - intrPoint;
-                        normalize(lightDir);
-
-                        // get the Lambertian cosine of the angle between the geometry's normal and
-                        // the direction to the light. This will scale the lighting:
-                        float cosTheta = dot(lightDir, N);
-                        if (cosTheta > 0)
-                            avg += lightCol / lenghtSqr(intrPoint - lightPos) * cosTheta;
-                    }
                 }
             }
             lightContrib += avg / (float)numSamples;

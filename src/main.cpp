@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
     //light.transform.translate(vec3(10, 10, 10)); // teapot
     light.transform.translate(vec3(-300, 700, -5)); // sponza
     // do not swap with translate, fucks up soft shadows
-    light.transform.scale(vec3(15));
+    light.transform.scale(vec3(25));
 
     light.init();
 
