@@ -105,7 +105,8 @@ namespace embRT
                 shadowRay.geomID = RTC_INVALID_GEOMETRY_ID;
                 shadowRay.primID = RTC_INVALID_GEOMETRY_ID;
                 shadowRay.mask = -1;
-                rtcOccluded(scene, shadowRay);
+                auto lightDist = (lightPos - shadowRayStart).length();
+                rtcIntersect(scene, shadowRay);
                 if (shadowRay.geomID == RTC_INVALID_GEOMETRY_ID)
                 {
                     vec3 lightDir = lightPos - intrPoint;
@@ -116,6 +117,20 @@ namespace embRT
                     float cosTheta = dot(lightDir, N);
                     if (cosTheta > 0)
                         avg += lightCol / lenghtSqr(intrPoint - lightPos) * cosTheta;
+                }
+                else
+                {
+                    if (shadowRay.tfar > lightDist)
+                    {
+                        vec3 lightDir = lightPos - intrPoint;
+                        normalize(lightDir);
+
+                        // get the Lambertian cosine of the angle between the geometry's normal and
+                        // the direction to the light. This will scale the lighting:
+                        float cosTheta = dot(lightDir, N);
+                        if (cosTheta > 0)
+                            avg += lightCol / lenghtSqr(intrPoint - lightPos) * cosTheta;
+                    }
                 }
             }
             lightContrib += avg / (float)numSamples;

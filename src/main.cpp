@@ -67,8 +67,8 @@ int main(int argc, char* argv[])
     rtcSetErrorFunction(error_handler);
 
     Mesh m;
-    //m.m_Data = readOBJ("../resources/sponza.obj");
-    m.m_Data = readOBJ("../resources/teapot_hires.obj");
+    m.m_Data = readOBJ("../resources/sponza.obj");
+   // m.m_Data = readOBJ("../resources/teapot_hires.obj");
 
     auto& verts = m.GenerateVertexBufferAligned();
 
@@ -106,15 +106,16 @@ int main(int argc, char* argv[])
 
     rtcCommit(scene);
     AreaLight light;
-    light.transform.translate(vec3(10, 10, 10));
+    //light.transform.translate(vec3(10, 10, 10)); // teapot
+    light.transform.translate(vec3(-300, 700, -5)); // sponza
     // do not swap with translate, fucks up soft shadows
-    light.transform.scale(vec3(5));
+    light.transform.scale(vec3(15));
 
     light.init();
 
-    Camera cam(vec3(0, 3, -7), vec3(20, 0, 0), 100); // teapot
+    //Camera cam(vec3(0, 3, -7), vec3(20, 0, 0), 100); // teapot
     //Camera cam(vec3(0, 30, -7), vec3(20, 90, 0), 100); // dust 2
-    //Camera cam(vec3(-200, 100, -5), vec3(0, 270, 0), 100); // sponza
+    Camera cam(vec3(-200, 100, -5), vec3(0, 270, 0), 100); // sponza
 
     auto t1 = std::chrono::high_resolution_clock::now();
     RenderToBufferThreaded(cam, FrameBuf, scene, m, light);
