@@ -16,33 +16,15 @@
 #include <embree2/rtcore_ray.h>
 
 #define GLM_FORCE_RADIANS 
-#include <glm.hpp>
-#include <gtc/quaternion.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtx/transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 #include <immintrin.h>
-#include <xmmintrin.h>
-#include <emmintrin.h>
-
-#include "constants.h"
-#include "SIMD_SSE.h"
-
-namespace embRT
-{
-    std::mt19937 rng(std::time(nullptr));
-    std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> FrameBuf;
-}
-
-#include "util.h"
-#include "camera.h"
-#include "objReader.h"
-#include "transform.h"
-#include "light.h"
-#include "BRDF.h"
-#include "mesh.h"
 #include "scene.h"
-#include "renderer.h"
 
+#include "renderer.h"
+#include "util.h"
 /* error reporting function */
 void error_handler(const RTCError code, const char* str)
 {
@@ -63,82 +45,74 @@ using namespace embRT;
 #undef main
 int main(int argc, char* argv[])
 {
-    rtcInit(NULL);
+    rtcInit(nullptr);
     rtcSetErrorFunction(error_handler);
 
-    Mesh m;
-    //m.m_Data = readOBJ("../resources/sponza.obj");
-    m.m_Data = readOBJ("../resources/teapot_hires.obj");
+    if (SDL_Init(SDL_INIT_EVERYTHING != 0))
+    {
+        std::cout << "SDL_init failed: " << SDL_GetError() << std::endl;
+        throw std::runtime_error("SDL_Init() failed !");
+    }
 
-    auto& verts = m.GenerateVertexBufferAligned();
+    SDLRenderer* render = new SDLRenderer();
+    scene = new Scene();
+    //Mesh m;
+    ////m.m_Data = readOBJ("../resources/sponza.obj");
+    //m.m_Data = readOBJ("../resources/teapot_hires.obj");
 
-    auto trisCount = std::get<3>(m.m_Data).size();
-    auto vertsCount = verts.size();
-    auto indBuf = m.GenerateIndexBufferAligned();
+    //auto& verts = m.GenerateVertexBufferAligned();
 
-    RTCScene scene = rtcNewScene(RTC_SCENE_STATIC | RTC_SCENE_COHERENT, RTC_INTERSECT1);
-    unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, trisCount, vertsCount);
+    //auto trisCount = std::get<3>(m.m_Data).size();
+    //auto vertsCount = verts.size();
+    //auto indBuf = m.GenerateIndexBufferAligned();
 
-    Vertex* vertices = (Vertex*) rtcMapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
-    memcpy(vertices, verts.data(), vertsCount * sizeof(Vertex));
-    rtcUnmapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
+    //unsigned int mesh = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, trisCount, vertsCount);
 
-    Triangle* triangles = (Triangle*) rtcMapBuffer(scene, mesh, RTC_INDEX_BUFFER);
-    memcpy(triangles, indBuf.data(), trisCount * sizeof(Triangle));
-    rtcUnmapBuffer(scene, mesh, RTC_INDEX_BUFFER);
+    //Vertex* vertices = (Vertex*) rtcMapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
+    //memcpy(vertices, verts.data(), vertsCount * sizeof(Vertex));
+    //rtcUnmapBuffer(scene, mesh, RTC_VERTEX_BUFFER);
 
-    ///* create a triangulated plane with 2 triangles and 4 vertices */
-    unsigned int plane = rtcNewTriangleMesh(scene, RTC_GEOMETRY_STATIC, 2, 4);
+    //Triangle* triangles = (Triangle*) rtcMapBuffer(scene, mesh, RTC_INDEX_BUFFER);
+    //memcpy(triangles, indBuf.data(), trisCount * sizeof(Triangle));
+    //rtcUnmapBuffer(scene, mesh, RTC_INDEX_BUFFER);
+    scene->addPlane();
+    scene->CommitRTCScene();
 
-    /* set vertices */
-    Vertex* v = (Vertex*)rtcMapBuffer(scene, plane, RTC_VERTEX_BUFFER);
-    v[0].x = -10; v[0].y = -0.5; v[0].z = -10;
-    v[1].x = -10; v[1].y = -0.5; v[1].z = +10;
-    v[2].x = +10; v[2].y = -0.5; v[2].z = -10;
-    v[3].x = +10; v[3].y = -0.5; v[3].z = +10;
-    rtcUnmapBuffer(scene, plane, RTC_VERTEX_BUFFER);
+    //AreaLight light;
+    //light.transform.translate(vec3(10, 10, 10)); // teapot
+    ////light.transform.translate(vec3(-300, 700, -5)); // sponza
+    //// do not swap with translate, fucks up soft shadows
+    //light.transform.scale(vec3(10));
 
-    /* set triangles */
-    Triangle* tris = (Triangle*)rtcMapBuffer(scene, plane, RTC_INDEX_BUFFER);
-    tris[0].v[0] = 0; tris[0].v[1] = 2; tris[0].v[2] = 1;
-    tris[1].v[0] = 1; tris[1].v[1] = 2; tris[1].v[2] = 3;
-    rtcUnmapBuffer(scene, plane, RTC_INDEX_BUFFER);
+    //light.init();
 
-    rtcCommit(scene);
-    AreaLight light;
-    light.transform.translate(vec3(10, 10, 10)); // teapot
-    //light.transform.translate(vec3(-300, 700, -5)); // sponza
-    // do not swap with translate, fucks up soft shadows
-    light.transform.scale(vec3(10));
-
-    light.init();
-
-    Camera cam(vec3(0, 3, -7), vec3(20, 0, 0), 100); // teapot
+    //Camera cam(vec3(0, 3, -7), vec3(20, 0, 0), 100); // teapot
     //Camera cam(vec3(0, 30, -7), vec3(20, 90, 0), 100); // dust 2
     //Camera cam(vec3(-200, 100, -5), vec3(0, 270, 0), 100); // sponza
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    RenderToBufferThreaded(cam, FrameBuf, scene, m, light);
+    //RenderToBufferThreaded(cam, FrameBuf, scene, m, light);
     auto t2 = std::chrono::high_resolution_clock::now();
     auto time = timePast(t1, t2);
     auto time2 = timePast<std::chrono::milliseconds>(t1, t2);
     auto ms = time2 - (time * 1000);
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
-    if (!InitVideo())
+  //  SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+   /* if (!InitVideo())
     {
         rtcExit();
         SDL_Quit();
         return -1;
     }
-    SwapBuffers(FrameBuf);
+    SwapBuffers(FrameBuf);*/
 
     std::stringstream ss;
     ss << "embRT: " << time << " s " << ms << " ms" << std::endl;
-    SDL_SetWindowTitle(m_Window, ss.str().c_str());
+    //SDL_SetWindowTitle(m_Window, ss.str().c_str());
     std::cout << "Rendering took " << time << " s " << ms << " ms" << std::endl;
 
-    WaitForUserExit();
+    //WaitForUserExit();
+    delete scene;
     rtcExit();
-    SDL_Quit();
+    delete render;
     return 0;
 }

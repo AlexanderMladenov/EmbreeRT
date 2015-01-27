@@ -1,9 +1,13 @@
 #ifndef __UTIL_H
 #define __UTIL_H
 
+#define GLM_FORCE_RADIANS 
+#include <glm\glm.hpp>
+#include <glm/gtx/transform.hpp>
+
 namespace embRT
 {
-    inline vec3 faceforward(const vec3& ray, const vec3& norm)
+    /*inline vec3 faceforward(const vec3& ray, const vec3& norm)
     {
         if (dot(ray, norm) < 0) return norm;
         else return -norm;
@@ -16,7 +20,8 @@ namespace embRT
         auto negNorm = -norm;
         return SIMD::Or(SIMD::And(ltZero, norm), SIMD::AndNot(ltZero, negNorm));
     }
-
+*/
+    using namespace glm;
     inline mat4 CreateRotationMatrix(const vec3& rot)
     {
         return rotate(radians(rot.z), vec3(0, 0, 1)) *
