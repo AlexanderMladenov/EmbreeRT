@@ -5,7 +5,7 @@
 
 namespace embRT
 {
-    SDLRenderer::SDLRenderer()
+   /* SDLRenderer::SDLRenderer()
     {
         auto begin = std::chrono::high_resolution_clock::now();
 
@@ -62,7 +62,7 @@ namespace embRT
                 row[x] = ConvertPixel(m_buffer[x][y]);
         }
         SDL_UpdateWindowSurface(m_window);
-    }
+    }*/
 
    /* vec3 RayTracer::Raytrace(RTCRay& ray)
     {

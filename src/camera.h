@@ -3,6 +3,8 @@
 #include <embree2\rtcore.h>
 #include <embree2\rtcore_ray.h>
 #include <glm/glm.hpp>
+
+#include "constants.h"
 using namespace glm;
 
 namespace embRT
@@ -20,6 +22,8 @@ namespace embRT
         vec3 m_Rotation;
         mat4 m_RotationMatrix;
         float m_Fov;
+
+        vec3 Frame[FRAME_WIDTH * FRAME_HEIGHT];
     };
 } // namespace embRT
 

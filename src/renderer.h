@@ -19,31 +19,6 @@
 using namespace glm;
 namespace embRT
 {
-    class SDLRenderer
-    {
-        public:
-
-        SDLRenderer();
-        ~SDLRenderer();
-
-        void SwapBuffers();
-        std::uint32_t ConvertPixel(const vec3& pixel) const;
-
-        // remove copy assign
-        SDLRenderer(const SDLRenderer& rhs) = delete;
-        SDLRenderer& operator = (SDLRenderer rhs) = delete;
-
-        std::array<std::array<vec3, FRAME_HEIGHT>, FRAME_WIDTH> m_buffer;
-
-        private:
-
-        Uint8 m_redShift;
-        Uint8 m_greenShift;
-        Uint8 m_blueShift;
-        SDL_Surface* m_surface = nullptr;
-        SDL_Window* m_window = nullptr;
-
-    };
 
     //
     //    void WaitForUserExit()

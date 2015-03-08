@@ -21,6 +21,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <immintrin.h>
+
+#include "sdl_wrapper.h"
 #include "scene.h"
 
 #include "renderer.h"
@@ -48,13 +50,14 @@ int main(int argc, char* argv[])
     rtcInit(nullptr);
     rtcSetErrorFunction(error_handler);
 
-    if (SDL_Init(SDL_INIT_EVERYTHING != 0))
+    if (!SETUP_SDL())
     {
-        std::cout << "SDL_init failed: " << SDL_GetError() << std::endl;
-        throw std::runtime_error("SDL_Init() failed !");
+        assert(false);
+        return -1;
     }
 
-    SDLRenderer* render = new SDLRenderer();
+    atexit(SDL_Quit);
+    atexit(rtcExit);
     scene = new Scene();
     //Mesh m;
     ////m.m_Data = readOBJ("../resources/sponza.obj");
@@ -112,7 +115,5 @@ int main(int argc, char* argv[])
 
     //WaitForUserExit();
     delete scene;
-    rtcExit();
-    delete render;
     return 0;
 }

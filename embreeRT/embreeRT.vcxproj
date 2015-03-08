@@ -152,6 +152,7 @@
     <ClCompile Include="..\src\objReader.cpp" />
     <ClCompile Include="..\src\renderer.cpp" />
     <ClCompile Include="..\src\scene.cpp" />
+    <ClCompile Include="..\src\sdl_wrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\BRDF.h" />
@@ -162,6 +163,7 @@
     <ClInclude Include="..\src\light.h" />
     <ClInclude Include="..\src\renderer.h" />
     <ClInclude Include="..\src\scene.h" />
+    <ClInclude Include="..\src\sdl_wrapper.h" />
     <ClInclude Include="..\src\SIMD_SSE.h" />
     <ClInclude Include="..\src\transform.h" />
     <ClInclude Include="..\src\util.h" />
