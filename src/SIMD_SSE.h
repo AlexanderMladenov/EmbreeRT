@@ -122,6 +122,7 @@ namespace embRT
                 z = _mm_set1_ps(v.z);
             }
 
+            // order inside is backwards argument list
             void Set(const vec3& a, const vec3& b, const vec3& c, const vec3& d)
             {
                 x = _mm_set_ps(a.x, b.x, c.x, d.x);
@@ -141,6 +142,30 @@ namespace embRT
 
                 return vec3(0.f);
             }
+
+        };
+        struct Vec4Packet
+        {
+
+            union
+            {
+                __m128 x; struct { float x0; float x1; float x2; float x3; };
+            };
+
+            union
+            {
+                __m128 y; struct { float y0; float y1; float y2; float y3; };
+            };
+
+            union
+            {
+                __m128 z; struct { float z0; float z1; float z2; float z3; };
+            };
+
+            union
+            {
+                __m128 w; struct { float w0; float w1; float w2; float w3; };
+            };
 
         };
 
@@ -218,17 +243,14 @@ namespace embRT
         }
 
         // TODO implementation
-        /* inline Vec3Packet operator*(const Matrix4& mat, const Vec3Packet& vec)
+         inline Vec3Packet operator*(const Matrix4& mat, const Vec3Packet& vec)
          {
-         _mm_prefetch((char*)&(mat.m[0][0]), _MM_HINT_T0);
-         Matrix4 matTransp = mat;
-         _MM_TRANSPOSE4_PS(matTransp.rows[0], matTransp.rows[1], matTransp.rows[2], matTransp.rows[3]);
-         Vec3Packet result;
+             Vec3Packet result;
+             Matrix4 matTranspose = mat;
 
-         auto x = Dot(vec, vec);
+             _MM_TRANSPOSE4_PS(matTranspose.rows[0], matTranspose.rows[1], matTranspose.rows[2], matTranspose.rows[3]);
 
-
-         }*/
+         }
 
         inline Vec3Packet And(const Vec3Packet& a, const Vec3Packet& b)
         {

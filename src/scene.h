@@ -13,19 +13,18 @@ namespace embRT
     struct Scene
     {
         std::unique_ptr<Camera> camera = nullptr;
-
-        RTCScene rtcscene;
         bool isCommited = false;
+        RTCScene rtcscene;
 
         Scene();
 
-       void addPlane();
-
-       inline void CommitRTCScene()
-       {
-           rtcCommit(rtcscene);
-           isCommited = true;
-       }
+        void addPlane(float y);
+        void addMeshFromOBJ(const std::string& path);
+        inline void CommitRTCScene()
+        {
+            rtcCommit(rtcscene);
+            isCommited = true;
+        }
 
     };
 

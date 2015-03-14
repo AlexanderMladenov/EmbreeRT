@@ -27,6 +27,7 @@
 
 #include "renderer.h"
 #include "util.h"
+#include "SIMD_SSE.h"
 /* error reporting function */
 void error_handler(const RTCError code, const char* str)
 {
@@ -40,6 +41,7 @@ void error_handler(const RTCError code, const char* str)
         case RTC_UNSUPPORTED_CPU: printf("RTC_UNSUPPORTED_CPU"); break;
         default: printf("invalid error code"); break;
     }
+    assert(false);
     exit(-2);
 }
 
@@ -50,15 +52,10 @@ int main(int argc, char* argv[])
     rtcInit(nullptr);
     rtcSetErrorFunction(error_handler);
 
-    if (!SETUP_SDL())
-    {
-        assert(false);
-        return -1;
-    }
-
     atexit(SDL_Quit);
     atexit(rtcExit);
     scene = new Scene();
+    
     //Mesh m;
     ////m.m_Data = readOBJ("../resources/sponza.obj");
     //m.m_Data = readOBJ("../resources/teapot_hires.obj");
@@ -78,7 +75,7 @@ int main(int argc, char* argv[])
     //Triangle* triangles = (Triangle*) rtcMapBuffer(scene, mesh, RTC_INDEX_BUFFER);
     //memcpy(triangles, indBuf.data(), trisCount * sizeof(Triangle));
     //rtcUnmapBuffer(scene, mesh, RTC_INDEX_BUFFER);
-    scene->addPlane();
+    scene->addPlane(-0.5f);
     scene->CommitRTCScene();
 
     //AreaLight light;
