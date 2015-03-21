@@ -51,10 +51,16 @@ int main(int argc, char* argv[])
 {
     rtcInit(nullptr);
     rtcSetErrorFunction(error_handler);
-
-    atexit(SDL_Quit);
     atexit(rtcExit);
 
+    if (!SETUP_SDL())
+    {
+        return -42;
+    }
+    SDL_version ver;
+    SDL_GetVersion(&ver);
+    printf("SDL Version: %d.%d.%d \n", ver.major, ver.minor, ver.patch);
+    atexit(SDL_Quit);
 
     //Camera cam(vec3(0, 3, -7), vec3(20, 0, 0), 100); // teapot
     //Camera cam(vec3(0, 30, -7), vec3(20, 90, 0), 100); // dust 2
@@ -74,24 +80,18 @@ int main(int argc, char* argv[])
     //light.init();
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    //RenderToBufferThreaded(cam, FrameBuf, scene, m, light);
+    RenderFrame();
     auto t2 = std::chrono::high_resolution_clock::now();
     auto time = timePast(t1, t2);
     auto time2 = timePast<std::chrono::milliseconds>(t1, t2);
     auto ms = time2 - (time * 1000);
-    //  SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
-    /* if (!InitVideo())
-     {
-     rtcExit();
-     SDL_Quit();
-     return -1;
-     }
-     SwapBuffers(FrameBuf);*/
+    std::cout << "Rendering took " << time << " s " << ms << " ms" << std::endl;
+    
+    // SwapBuffers(FrameBuf);*/
 
     std::stringstream ss;
     ss << "embRT: " << time << " s " << ms << " ms" << std::endl;
     //SDL_SetWindowTitle(m_Window, ss.str().c_str());
-    std::cout << "Rendering took " << time << " s " << ms << " ms" << std::endl;
 
     system("pause");
     return 0;

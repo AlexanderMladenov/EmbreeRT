@@ -20,7 +20,10 @@ using namespace glm;
 namespace embRT
 {
 
-    
+    extern vec3 m_frameBuffer[FRAME_WIDTH][FRAME_HEIGHT];
+
+    void RenderFrame();
+
     void WaitForUserExit();
         
     //

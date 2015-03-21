@@ -5,6 +5,21 @@
 
 namespace embRT
 {
+    vec3 m_frameBuffer[FRAME_WIDTH][FRAME_HEIGHT];
+
+    void RenderFrame()
+    {
+        auto& camera = scene->camera;
+        for (int x = 0; x < FRAME_WIDTH; x++)
+        {
+            for (int y = 0; y < FRAME_HEIGHT; y++)
+            {
+                auto ray = camera.GetRay(x, y);
+                m_frameBuffer[x][y] = vec3(ray.dir[0], ray.dir[1], ray.dir[2]);
+            }
+        }
+    }
+
     void WaitForUserExit()
     {
         SDL_Event e;
