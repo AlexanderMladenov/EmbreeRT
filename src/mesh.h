@@ -1,36 +1,32 @@
 #ifndef __TRIANGLE_MESH_H
 #define __TRIANGLE_MESH_H
 
+#include <vector>
+#include <tuple>
+
+#include "types.h"
+
 namespace embRT
 {
     struct Mesh
     {
-        PositionsNormalsUVsTris m_Data;
+        std::string name; // name of mesh file
+        PositionsNormalsUVsTris meshDataOBJ; // mesh data as read from obj file
+        std::vector<Triangle> indices; // index buffer for direct use with embree
+        std::vector<Vertex>& vertices; // vertex buffer for direct use with embree
 
-        Lambert m_material;
+        // array with vertex indices, normal indices and texture indices (for meshDataOBJ) for any other use
+        std::vector<FullTriangleData>& triangles; 
+
+
+        Mesh(const PositionsNormalsUVsTris& meshData);
 
         inline std::vector<Vertex> GenerateVertexBufferAligned() const
         {
-            return std::get<0>(m_Data);
+            return std::get<0>(meshDataOBJ);
         }
 
-        std::vector<Triangle> GenerateIndexBufferAligned() const
-        {
-            auto trisCount = std::get<3>(m_Data).size();
-            auto trisData = std::get<3>(m_Data);
-            std::vector<Triangle> result;
-            result.reserve(trisCount);
-
-            for (auto i = 0; i < trisCount; i++)
-            {
-                Triangle T;
-                T.v[0] = trisData[i].v[0];
-                T.v[1] = trisData[i].v[1];
-                T.v[2] = trisData[i].v[2];
-                result.push_back(T);
-            }
-            return result;
-        }
+        std::vector<Triangle> GenerateIndexBufferAligned() const;
     };
 
 } // namespace embRT

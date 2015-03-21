@@ -1,12 +1,18 @@
 #include "scene.h"
+#include "types.h"
 #include "objReader.h"
+
 namespace embRT
 {
     Scene::Scene() :
-        camera(std::make_unique<Camera>(vec3(0, 3, -7), vec3(20, 0, 0), 100)),
+        camera(vec3(0, 3, -7), vec3(20, 0, 0), 100),
         rtcscene(rtcNewScene(RTC_SCENE_STATIC, RTC_INTERSECT1))
-    {
-    }
+    {}
+
+    Scene::Scene(const vec3& cameraPos, const vec3& cameraRot, float cameraFoV) :
+        camera(cameraPos, cameraRot, cameraFoV),
+        rtcscene(rtcNewScene(RTC_SCENE_STATIC, RTC_INTERSECT1))
+    {}
 
     void Scene::addPlane(float y)
     {
@@ -30,7 +36,23 @@ namespace embRT
 
     void Scene::addMeshFromOBJ(const std::string& path)
     {
+        auto meshData = readOBJ(path);
+        Mesh mesh(meshData);
 
+        auto trisCount = mesh.triangles.size();
+        auto vertsCount = mesh.vertices.size();
+
+        unsigned int rtcMesh = rtcNewTriangleMesh(rtcscene, RTC_GEOMETRY_STATIC, trisCount, vertsCount);
+
+        Vertex* vertices = (Vertex*)rtcMapBuffer(rtcscene, rtcMesh, RTC_VERTEX_BUFFER);
+        memcpy(vertices, mesh.vertices.data(), vertsCount * sizeof(Vertex));
+        rtcUnmapBuffer(rtcscene, rtcMesh, RTC_VERTEX_BUFFER);
+
+        Triangle* triangles = (Triangle*)rtcMapBuffer(rtcscene, rtcMesh, RTC_INDEX_BUFFER);
+        memcpy(triangles, mesh.indices.data(), trisCount * sizeof(Triangle));
+        rtcUnmapBuffer(rtcscene, rtcMesh, RTC_INDEX_BUFFER);
     }
-    Scene* scene = nullptr;
+
+
+    std::unique_ptr<Scene> scene = nullptr;
 }

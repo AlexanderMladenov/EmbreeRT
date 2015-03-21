@@ -5,6 +5,21 @@
 
 namespace embRT
 {
+    void WaitForUserExit()
+    {
+        SDL_Event e;
+        bool wantExit = false;
+        while (!wantExit)
+        {
+            SDL_PollEvent(&e);
+
+            if (e.type == SDL_QUIT)
+            {
+                wantExit = true;
+                exit(0);
+            }
+        }
+    }
    /* SDLRenderer::SDLRenderer()
     {
         auto begin = std::chrono::high_resolution_clock::now();

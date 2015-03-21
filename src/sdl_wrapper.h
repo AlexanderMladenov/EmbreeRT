@@ -3,7 +3,7 @@
 
 #include <SDL.h>
 #include <cstdio>
-
+// REWORK !!!!!!!!!!!!!!!!!!!
 namespace embRT
 {
     bool SETUP_SDL();

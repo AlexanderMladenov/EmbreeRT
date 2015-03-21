@@ -20,22 +20,9 @@ using namespace glm;
 namespace embRT
 {
 
-    //
-    //    void WaitForUserExit()
-    //    {
-    //        SDL_Event e;
-    //        bool wantExit = false;
-    //        while (!wantExit)
-    //        {
-    //            SDL_PollEvent(&e);
-    //
-    //            if (e.type == SDL_QUIT)
-    //            {
-    //                wantExit = true;
-    //                exit(0);
-    //            }
-    //        }
-    //    }
+    
+    void WaitForUserExit();
+        
     //
     //    vec3 Raytrace(RTCRay ray, const RTCScene& scene, const Mesh& data, const AreaLight& light)
     //    {
