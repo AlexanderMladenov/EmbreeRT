@@ -4,8 +4,8 @@
 namespace embRT
 {
 
-#define FRAME_WIDTH 1280
-#define FRAME_HEIGHT 720
+#define FRAME_WIDTH 640
+#define FRAME_HEIGHT 480
 #define PI 3.14159265359f
 #define PI2 6.28318530718f
 #define PIHALF 1.57079632679f

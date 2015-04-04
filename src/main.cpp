@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
     //Camera cam(vec3(-200, 100, -5), vec3(0, 270, 0), 100); // sponza
 
     scene = std::make_unique<Scene>(vec3(0, 3, -7), vec3(20, 0, 0), 90);
-    scene->addMeshFromOBJ("../resources/sphere.obj");
+    scene->addMeshFromOBJ("../resources/teapot_lowres.obj");
 
     scene->addPlane(-0.5f);
     scene->CommitRTCScene();
@@ -86,8 +86,9 @@ int main(int argc, char* argv[])
     auto time2 = timePast<std::chrono::milliseconds>(t1, t2);
     auto ms = time2 - (time * 1000);
     std::cout << "Rendering took " << time << " s " << ms << " ms" << std::endl;
-    
-    // SwapBuffers(FrameBuf);*/
+    sdlRenderer = std::make_unique<SDLRendering>();
+
+    sdlRenderer->SwapBuffers();
 
     std::stringstream ss;
     ss << "embRT: " << time << " s " << ms << " ms" << std::endl;

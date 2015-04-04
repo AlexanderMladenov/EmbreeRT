@@ -245,7 +245,7 @@ namespace embRT
         // TODO implementation
          inline Vec3Packet operator*(const Matrix4& mat, const Vec3Packet& vec)
          {
-             Vec3Packet result;
+//             Vec3Packet result;
              Matrix4 matTranspose = mat;
 
              _MM_TRANSPOSE4_PS(matTranspose.rows[0], matTranspose.rows[1], matTranspose.rows[2], matTranspose.rows[3]);

@@ -20,7 +20,9 @@ using namespace glm;
 namespace embRT
 {
 
-    extern vec3 m_frameBuffer[FRAME_WIDTH][FRAME_HEIGHT];
+    extern float frameRed[FRAME_WIDTH][FRAME_HEIGHT];
+    extern float frameGreen[FRAME_WIDTH][FRAME_HEIGHT];
+    extern float frameBlue[FRAME_WIDTH][FRAME_HEIGHT];
 
     void RenderFrame();
 

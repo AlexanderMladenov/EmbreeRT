@@ -2,11 +2,15 @@
 #include "constants.h"
 #include "util.h"
 #include "scene.h"
-
+#include "SIMD_SSE.h"
 namespace embRT
 {
-    vec3 m_frameBuffer[FRAME_WIDTH][FRAME_HEIGHT];
+    using namespace SIMD;
 
+    float frameRed[FRAME_WIDTH][FRAME_HEIGHT];
+    float frameGreen[FRAME_WIDTH][FRAME_HEIGHT];
+    float frameBlue[FRAME_WIDTH][FRAME_HEIGHT];
+    
     void RenderFrame()
     {
         auto& camera = scene->camera;
@@ -15,7 +19,9 @@ namespace embRT
             for (int y = 0; y < FRAME_HEIGHT; y++)
             {
                 auto ray = camera.GetRay(x, y);
-                m_frameBuffer[x][y] = vec3(ray.dir[0], ray.dir[1], ray.dir[2]);
+                frameRed[x][y] = ray.dir[0];
+                frameGreen[x][y] = ray.dir[1];
+                frameBlue[x][y] = ray.dir[2];
             }
         }
     }

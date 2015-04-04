@@ -160,9 +160,9 @@ namespace embRT
 
             if (components[0] == "f")
             {
-                int numTriangles = components.size() - 3;
+                auto numTriangles = components.size() - 3;
 
-                for (int i = 0; i < numTriangles; i++)
+                for (size_t i = 0; i < numTriangles; i++)
                 {
                     auto T = constructTriangle(components[1], components[2 + i], components[3 + i]);
                     tris.emplace_back(T);
